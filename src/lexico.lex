@@ -29,9 +29,6 @@ fechamentocomentario [*][/]
 <texto>\" {BEGIN(INITIAL);}
 <texto>. {;}
 
-
-
-
 "=" { yylval= strdup(yytext); return t_igual;}
 "+" { yylval= strdup(yytext); return t_mais;}
 "-" { yylval= strdup(yytext); return t_menos;}
@@ -41,15 +38,20 @@ fechamentocomentario [*][/]
 int { yylval= strdup(yytext); return t_int;}
 float { yylval= strdup(yytext); return t_float;}
 char { yylval= strdup(yytext); return t_char;}
+class { yylval= strdup(yytext); return t_class;}
 "["  {yylval= strdup(yytext); return t_vetorabri;}
 "]" { yylval= strdup(yytext); return t_vetorfecha;}
 
-for {return t_for;}
+for {yylval= strdup(yytext); return t_for;}
+while {yylval= strdup(yytext); return t_while;}
+if {yylval= strdup(yytext); return t_if;}
+else {yylval= strdup(yytext); return t_else;}
+switch {yylval= strdup(yytext); return t_switch;}
 
 {numero}+ { yylval= strdup(yytext);  return t_num;}
 {decimal} { yylval= strdup(yytext);  return t_decimal;}
 {texto}+ { yylval= strdup(yytext);  return t_palavra;}
-{variavel} {yylval=strdup(yytext);;return t_variavel;} 
+{variavel} {yylval=strdup(yytext); return t_variavel;} 
 {novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 

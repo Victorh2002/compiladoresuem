@@ -18,7 +18,7 @@
 %token t_num t_palavra t_palavranum t_decimal t_varname 
 
 /* Tokens de repetição e condicionais */
-%token t_for t_while t_if t_else t_chaveabri t_chavefecha t_parentesabri t_parentesfecha t_pontvirgula 
+%token t_for t_while t_if t_else t_switch t_chaveabri t_chavefecha t_parentesabri t_parentesfecha t_pontvirgula 
 
 /* Tokens classe e função */
 %token t_class t_func t_variavel
@@ -47,7 +47,7 @@ tipos:
 valorespermitidos:
   t_num | t_palavra | t_palavranum | t_decimal | t_varname 
 controle:
-  t_for | t_while | t_if | t_else | t_chaveabri | t_chavefecha | t_parentesabri | t_parentesfecha | t_pontvirgula 
+  t_for | t_while | t_if | t_else | t_switch | t_chaveabri | t_chavefecha | t_parentesabri | t_parentesfecha | t_pontvirgula 
 classefuncao:
   t_class | t_func | t_variavel
 %%
