@@ -49,13 +49,14 @@ fechamentocomentario [*][/]
     }
     // Adicionar tratamento se o buffer estourar
 }
-<texto>. {;}
 
 "=" { lexeno(yytext); return t_igual;}
 "+" { lexeno(yytext); return t_mais;}
 "-" { lexeno(yytext); return t_menos;}
 "*" { lexeno(yytext); return t_asteristico;}
 "/" { lexeno(yytext); return t_barra;}
+and  {lexeno(yytext); return t_and;}
+or  {lexeno(yytext); return t_or;}
 
 int { lexeno(yytext); return t_int;}
 float { lexeno(yytext); return t_float;}
@@ -63,6 +64,7 @@ char { lexeno(yytext); return t_char;}
 class { lexeno(yytext); return t_class;}
 "["  {lexeno(yytext); return t_vetorabri;}
 "]" { lexeno(yytext); return t_vetorfecha;}
+";" { lexeno(yytext); return t_pontvirgula;}
 
 for {lexeno(yytext); return t_for;}
 while {lexeno(yytext); return t_while;}

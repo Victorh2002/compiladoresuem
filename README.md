@@ -3,7 +3,6 @@
 ## Enunciado
 
 Equipe
-- Valdeir de Souza Prestes ra 88257
 - Victor Hugo Franciscon ra12077
 - William Massashi Ito Yoshida ra117497
 

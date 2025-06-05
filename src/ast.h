@@ -35,16 +35,13 @@ ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int taman
         for (int i = 0; i < tamanho; i++)
         {
             no->filhos[i] = filhos[i];
-            printf("%s", filhos[i]->valor);
         }
-        no->child_count = tamanho - 1;
+        no->child_count = tamanho;
     }
     no->proximo_comando = proximo;
     return no;
 }
 
-/*
-// Protótipo da função de impressão (será definida depois)
 void imprimir_ast(ASTNode *no, int nivel) {
     if (no == NULL) {
         return;
@@ -55,7 +52,6 @@ void imprimir_ast(ASTNode *no, int nivel) {
         printf("  ");
     }
 
-    // Imprime informações do nó
     switch (no->type) {
         case NODE_TYPE_PROGRAMA:
             printf("Programa\n");
@@ -74,26 +70,18 @@ void imprimir_ast(ASTNode *no, int nivel) {
             printf("Nó Desconhecido\n");
     }
 
-    // Chama recursivamente para os filhos (se houver)
-    if (no->filho_esquerda) {
-        imprimir_ast(no->filho_esquerda, nivel + 1);
+    if (no->child_count > 0) {
+        //printf("child count %d\n", no->child_count);
+        for (int i = 0; i < no->child_count; i++)
+        {
+            imprimir_ast(no->filhos[i], nivel + 1);
+        }
+        
     }
-    if (no->filho_direita) {
-        imprimir_ast(no->filho_direita, nivel + 1);
-    }
-    // Se for uma lista de comandos, percorre a lista
-    if (no->proximo_comando) { // (Ajustar: proximo_comando é mais para o nível de lista_comandos)
-        // Se a impressão é estritamente hierárquica, o proximo_comando
-        // seria impresso no mesmo nível pelo chamador da lista.
-        // Ou, se um nó de "Programa" ou "Bloco" tem uma lista de filhos:
-        // ASTNode* atual = no->primeiro_comando_do_bloco;
-        // while(atual) {
-        //    imprimir_ast(atual, nivel + (é_filho_direto ? 1 : 0));
-        //    atual = atual->proximo_comando_na_lista;
-        // }
-        // Para o exemplo atual, `lista_comandos` é encadeada via `proximo_comando`:
+
+    if (no->proximo_comando) {
         if (no->type == NODE_TYPE_PROGRAMA || nivel == 0) { // Apenas para o nó raiz ou um nó de programa
              imprimir_ast(no->proximo_comando, nivel); // Imprime o próximo comando no mesmo nível
         }
     }
-}*/
+}

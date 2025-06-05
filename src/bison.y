@@ -14,7 +14,7 @@
 }
 
 /* operadores lógicos */
-%token t_igual t_mais t_menos t_asteristico t_barra
+%token t_igual t_mais t_menos t_asteristico t_barra t_and t_or
 
 /* tipos */
 %token t_int t_float t_char t_vetorabri t_vetorfecha
@@ -31,7 +31,7 @@
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha
 
-%type <str> valor expressao operador lista_comandos comandos t_id t_mais t_num
+%type <str> valor expressao operador lista_comandos comandos t_id t_mais t_num 
 
 /*
 %% //Gramática deste ponto para baixo
@@ -44,7 +44,7 @@ programa:
   controle  {fprintf(yyout, "[%d] Achou um controle (%s)\n", linha, $1);} | 
   classefuncao  {fprintf(yyout, "[%d] Achou um classefuncao_outras (%s)\n", linha, $1);}
 operadores:
-  t_igual | t_mais | t_menos | t_asteristico | t_barra 
+  t_igual | t_mais | t_menos | t_asteristico | t_barra | t_and | t_or
 tipos:
   t_int | t_float  | t_char | t_vetorabri | t_vetorfecha 
 valorespermitidos:
@@ -53,8 +53,7 @@ controle:
   t_for | t_while | t_if | t_else | t_switch | t_chaveabri | t_chavefecha | t_parentesabri | t_parentesfecha | t_pontvirgula 
 classefuncao:
   t_class | t_func | t_id
-%%
-*/
+%%*/
 
 %%
     inicio:
@@ -63,7 +62,8 @@ classefuncao:
             printf("Parsing concluído com sucesso.\n");
             if (raiz_ast) {
                 printf("Imprimindo AST:\n");
-                // Aqui você também liberaria a memória da AST com uma função free_ast(raiz_ast);
+                imprimir_ast(raiz_ast, 0);
+                free(raiz_ast);
             }
         }
     lista_comandos:
@@ -82,28 +82,28 @@ classefuncao:
             }
         }
     comandos:
-        expressao {$$ = $1;} |
+        expressao t_pontvirgula {$$ = $1;} |
     expressao:
         valor {$$ = $1;}|
         expressao operador valor {
             // $2 é o lexema de T_MAIS (ex: "+")
-            ASTNode *teste[2] = {$1, $3};
+            ASTNode *teste[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, teste, 2, NULL);
-            // Nota: $2 (de T_MAIS) também é um char* (sval), então precisamos liberá-lo
+            // Nota: $2 (de T_MAIS) também é um char* (str), então precisamos liberá-lo
             // se não for usado diretamente pelo criar_no ou se criar_no fizer strdup.
             // Se criar_no faz strdup (como no exemplo), o $2 original pode ser liberado
             // aqui se o Flex o alocou. Se o Flex não alocou (ex: é um ponteiro para yytext),
-            // não precisa liberar. Assumindo que T_MAIS <sval> fez strdup no Flex:
+            // não precisa liberar. Assumindo que T_MAIS <str> fez strdup no Flex:
             if ($2) free($2);
         }
     valor:
         t_num {
             $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, NULL, NULL);
-            if ($1) free($1); // Libera o sval do token, pois criar_no fez strdup
+            if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
         t_id {
             $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, NULL, NULL);
-            if ($1) free($1); // Libera o sval do token
+            if ($1) free($1); // Libera o str do token
         }
     operador:
         t_mais {$$ = $1;}
