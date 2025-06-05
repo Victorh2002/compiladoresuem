@@ -89,7 +89,7 @@ Para compilar o teste do analisador léxico são 3 comandos manuais:
 ```
 bison -H bison.y
 flex lexico.lex
-gcc -g -o testelexico bison.tab.c lex.yy.c
+gcc -g -o teste bison.tab.c lex.yy.c
 ```
 
 ## Usando o make 
@@ -101,5 +101,5 @@ make
 
 Para executar use:
 ```
-./testelexico -e arquivo.teste -s saida.teste
+./teste -e arquivo.teste -s saida.teste
 ```
