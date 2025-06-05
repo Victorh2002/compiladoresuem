@@ -21,7 +21,7 @@ typedef struct ASTNode {
 } ASTNode;
 
 // Função auxiliar para criar nós
-ASTNode* criar_no(NodeType type, const char* valor, ASTNode* esquerda, ASTNode* direita, ASTNode* proximo) {
+ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo) {
     ASTNode* no = (ASTNode*) malloc(sizeof(ASTNode));
     if (!no) {
         printf("Falha ao alocar memória para nó da AST");
@@ -29,23 +29,21 @@ ASTNode* criar_no(NodeType type, const char* valor, ASTNode* esquerda, ASTNode* 
     }
     no->type = type;
     no->valor = valor ? strdup(valor) : NULL; // Copia o valor se existir
-    if (no)
+    if (tamanho && filhos)
     {
-        /* code */
+        no->filhos = (ASTNode**) malloc(tamanho * sizeof(ASTNode));
+        for (int i = 0; i < tamanho; i++)
+        {
+            no->filhos[i] = filhos[i];
+            printf("%s", filhos[i]->valor);
+        }
+        no->child_count = tamanho - 1;
     }
-    
-    if (no->child_count > 4)
-    {
-        /* code */
-    }
-    
-    no->filhos = (ASTNode**) malloc(4 * sizeof(ASTNode))
-    no->filho_esquerda = esquerda;
-    no->filho_direita = direita;
     no->proximo_comando = proximo;
     return no;
 }
 
+/*
 // Protótipo da função de impressão (será definida depois)
 void imprimir_ast(ASTNode *no, int nivel) {
     if (no == NULL) {
@@ -98,4 +96,4 @@ void imprimir_ast(ASTNode *no, int nivel) {
              imprimir_ast(no->proximo_comando, nivel); // Imprime o próximo comando no mesmo nível
         }
     }
-}
+}*/

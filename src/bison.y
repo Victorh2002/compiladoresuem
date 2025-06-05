@@ -63,7 +63,6 @@ classefuncao:
             printf("Parsing concluído com sucesso.\n");
             if (raiz_ast) {
                 printf("Imprimindo AST:\n");
-                imprimir_ast(raiz_ast, 0);
                 // Aqui você também liberaria a memória da AST com uma função free_ast(raiz_ast);
             }
         }
@@ -88,7 +87,8 @@ classefuncao:
         valor {$$ = $1;}|
         expressao operador valor {
             // $2 é o lexema de T_MAIS (ex: "+")
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, $1, $3, NULL);
+            ASTNode *teste[2] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, teste, 2, NULL);
             // Nota: $2 (de T_MAIS) também é um char* (sval), então precisamos liberá-lo
             // se não for usado diretamente pelo criar_no ou se criar_no fizer strdup.
             // Se criar_no faz strdup (como no exemplo), o $2 original pode ser liberado
