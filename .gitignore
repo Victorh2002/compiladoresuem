@@ -56,3 +56,4 @@ src/lex.yy.c
 teste
 saida.teste
 testelexico
+*.output

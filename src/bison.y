@@ -1,37 +1,39 @@
 %{
-  #include <stdio.h>
-  #include "ast.h"
-  int yylex (void);
-  void yyerror (char const *);
-  extern FILE *yyout;
-  ASTNode *raiz_ast = NULL;
-
-  long linha=1;
+    #include "ast.h"
+    #include <stdio.h>
+    
+    int yylex (void);
+    void yyerror (char const *);
+    extern FILE *yyout;
+    extern long linha;
+    extern ASTNode *raiz_ast;
 %}
 
 %union {
     char* str;
+    ASTNode* no_ast;
 }
 
 /* operadores lógicos */
-%token t_igual t_mais t_menos t_asteristico t_barra t_and t_or
+%token <str> t_igual t_mais t_menos t_asteristico t_barra t_and t_or
 
 /* tipos */
 %token t_int t_float t_char t_vetorabri t_vetorfecha
 
 /* valores de atribuição para tipos*/
-%token t_num t_palavra t_palavranum t_decimal t_varname 
+%token <str> t_num t_palavra t_palavranum t_decimal t_varname 
 
 /* Tokens de repetição e condicionais */
 %token t_for t_while t_if t_else t_switch t_chaveabri t_chavefecha t_parentesabri t_parentesfecha t_pontvirgula 
 
 /* Tokens classe e função */
-%token t_class t_func t_id
+%token <str> t_class t_func t_id
 
 /* token de espacamento  novalinha, tabulação  e espaço em branco*/
 %token t_espaco t_novalinha
 
-%type <str> valor expressao operador lista_comandos comandos t_id t_mais t_num 
+%type <no_ast> valor expressao lista_comandos comandos
+%type <str> operador
 
 /*
 %% //Gramática deste ponto para baixo
@@ -56,18 +58,18 @@ classefuncao:
 %%*/
 
 %%
-    inicio:
+    programa:
         lista_comandos {
-            raiz_ast = $1; // Guarda a raiz da AST construída
-            printf("Parsing concluído com sucesso.\n");
-            if (raiz_ast) {
-                printf("Imprimindo AST:\n");
-                imprimir_ast(raiz_ast, 0);
-                free(raiz_ast);
-            }
+            ASTNode* filhos_do_programa[] = {$1};
+             // Se a lista for vazia ($1 é NULL), o nó programa não terá filhos.
+            int num_filhos = ($1 != NULL) ? 1 : 0;
+
+            // Criamos o nó raiz e o atribuímos à variável global.
+            raiz_ast = criar_no(NODE_TYPE_PROGRAMA, "Programa", filhos_do_programa, num_filhos, NULL);
         }
     lista_comandos:
-        %empty| lista_comandos comandos {
+        %empty {$$ = NULL;} | 
+        lista_comandos comandos {
             // Adiciona o novo comando à lista (simplesmente encadeando)
             ASTNode *lista = $1;
             if (lista == NULL) {
@@ -82,7 +84,7 @@ classefuncao:
             }
         }
     comandos:
-        expressao t_pontvirgula {$$ = $1;} |
+        expressao t_pontvirgula {$$ = $1;} 
     expressao:
         valor {$$ = $1;}|
         expressao operador valor {
@@ -98,15 +100,14 @@ classefuncao:
         }
     valor:
         t_num {
-            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, NULL, NULL);
+            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL);
             if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
         t_id {
-            $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, NULL, NULL);
+            $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, 0, NULL);
             if ($1) free($1); // Libera o str do token
         }
     operador:
         t_mais {$$ = $1;}
 
 %%
-

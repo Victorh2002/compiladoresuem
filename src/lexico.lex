@@ -1,16 +1,16 @@
 %option noyywrap
 %{
 	#include <string.h>
+    #include "ast.h"
     #include "bison.tab.h"
-	extern long linha;
 
     #define lexeno(var)(yylval.str = strdup(yytext))
+    long linha = 1;
 %}
 
 numero [0-9]
 decimal [0-9]*.[0-9]
 espaco [" "\t]
-novalinha [\n]
 id [a-zA-Z][a-zA-Z0-9_]*
 aberturacomentario [/][*]
 fechamentocomentario [*][/]
@@ -23,7 +23,7 @@ fechamentocomentario [*][/]
 <comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
 <comentario>[^*\n]+ 
 <comentario>"*"
-<comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
+<comentario>\r\n|\n|\r {linha++; /* não retornar token, apenas incrementa a variável de controle*/}
 
 %{
     // Buffer para acumular o conteúdo da string
@@ -75,29 +75,8 @@ switch {lexeno(yytext); return t_switch;}
 {numero}+ { lexeno(yytext);  return t_num;}
 {decimal} { lexeno(yytext);  return t_decimal;}
 {id} { lexeno(yytext); return t_id;} 
-{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
+\r\n|\n|\r {linha++; /* não retornar token, apenas incrementa a variável de controle*/}
 {espaco} /* Não faz nada, apenas consome*/
 
-. { printf("\'%c\' (linha %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
+. { printf("\'%c\' (linha %ld) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
 %%
-
-void yyerror (char const s){
-	fprintf(stderr, "%s\n\n",s);
-}
-
-int main(int argc, char *arqv[]){
-	for(int i = 1; i < argc ; i++){
-		if( strcmp(arqv[i], "-e") == 0 && i<argc){
-			yyin = fopen(arqv[i+1],"r");
-			if(!yyin){
-				printf("Não foi possível abrir o arquivo %s\n",arqv[i+1]);
-				exit(-1);
-			}
-			i = i+1;
-		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
-			yyout = fopen(arqv[i+1],"w");
-			i = i+1;
-		}
-	}
-	return yyparse();
-}
