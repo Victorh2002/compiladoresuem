@@ -45,6 +45,12 @@ void imprimir_ast(ASTNode *no, int nivel) {
         case NODE_TYPE_OPERACAO_BINARIA:
             printf("Operacao: %s\n", no->valor); // Imprime o operador (ex: "+")
             break;
+        case NODE_TYPE_FUNCAO_DECL:
+            printf("Declaração de Funcao: %s\n", no->valor); // Imprime o operador (ex: "+")
+            break;
+        case NODE_TYPE_ATRIBUICAO:
+            printf("Atribuicao: %s\n", no->valor); // Imprime o operador (ex: "+")
+            break;
         // Adicione outros casos
         default:
             printf("Nó Desconhecido\n");

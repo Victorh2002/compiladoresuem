@@ -11,6 +11,8 @@ typedef enum {
     NODE_TYPE_IDENTIFICADOR,
     NODE_TYPE_OPERACAO_BINARIA,
     NODE_TYPE_PROGRAMA,
+    NODE_TYPE_FUNCAO_DECL,
+    NODE_TYPE_ATRIBUICAO,
     // Adicione outros tipos de nós conforme necessário
 } NodeType;
 

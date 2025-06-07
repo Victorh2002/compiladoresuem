@@ -8,8 +8,8 @@
     long linha = 1;
 %}
 
-numero [0-9]
-decimal [0-9]*.[0-9]
+numero [0-9]+
+decimal [0-9]+\.[0-9]+
 espaco [" "\t]
 id [a-zA-Z][a-zA-Z0-9_]*
 aberturacomentario [/][*]
@@ -50,21 +50,25 @@ fechamentocomentario [*][/]
     // Adicionar tratamento se o buffer estourar
 }
 
-"=" { lexeno(yytext); return t_igual;}
-"+" { lexeno(yytext); return t_mais;}
+"=" { printf("-> LEXER: Gerou token t_igual\n"); lexeno(yytext); return t_igual;}
+"+" { printf("-> LEXER: Gerou token t_mais\n"); lexeno(yytext); return t_mais;}
 "-" { lexeno(yytext); return t_menos;}
 "*" { lexeno(yytext); return t_asteristico;}
 "/" { lexeno(yytext); return t_barra;}
 and  {lexeno(yytext); return t_and;}
 or  {lexeno(yytext); return t_or;}
 
-int { lexeno(yytext); return t_int;}
+int { printf("-> LEXER: Gerou token t_int\n"); lexeno(yytext); return t_int;}
 float { lexeno(yytext); return t_float;}
 char { lexeno(yytext); return t_char;}
 class { lexeno(yytext); return t_class;}
 "["  {lexeno(yytext); return t_vetorabri;}
 "]" { lexeno(yytext); return t_vetorfecha;}
-";" { lexeno(yytext); return t_pontvirgula;}
+"(" { printf("-> LEXER: Gerou token t_parentesabri\n"); lexeno(yytext); return t_parentesabri;}
+")" { printf("-> LEXER: Gerou token t_parentesfecha\n"); lexeno(yytext); return t_parentesfecha;}
+"{" { printf("-> LEXER: Gerou token t_chaveabri\n"); lexeno(yytext); return t_chaveabri;}
+"}" { printf("-> LEXER: Gerou token t_chavefecha\n"); lexeno(yytext); return t_chavefecha;}
+";" { printf("-> LEXER: Gerou token t_pontvirgula\n"); lexeno(yytext); return t_pontvirgula;}
 
 for {lexeno(yytext); return t_for;}
 while {lexeno(yytext); return t_while;}
@@ -72,11 +76,11 @@ if {lexeno(yytext); return t_if;}
 else {lexeno(yytext); return t_else;}
 switch {lexeno(yytext); return t_switch;}
 
-{numero}+ { lexeno(yytext);  return t_num;}
-{decimal} { lexeno(yytext);  return t_decimal;}
-{id} { lexeno(yytext); return t_id;} 
 \r\n|\n|\r {linha++; /* não retornar token, apenas incrementa a variável de controle*/}
-{espaco} /* Não faz nada, apenas consome*/
+{decimal} { printf("-> LEXER: Gerou token t_decimal\n"); lexeno(yytext);  return t_decimal;}
+{numero} { printf("-> LEXER: Gerou token t_num\n"); lexeno(yytext);  return t_num;}
+{id} { printf("-> LEXER: Gerou token t_id\n"); lexeno(yytext); return t_id;} 
+{espaco}+ /* Não faz nada, apenas consome*/
 
 . { printf("\'%c\' (linha %ld) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
 %%
