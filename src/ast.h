@@ -13,21 +13,36 @@ typedef enum {
     NODE_TYPE_PROGRAMA,
     NODE_TYPE_FUNCAO_DECL,
     NODE_TYPE_ATRIBUICAO,
+    NODE_TYPE_VAR_DECL,
+    NODE_TYPE_ARRAY_LITERAL,
+    NODE_TYPE_RETURN,
     // Adicione outros tipos de nós conforme necessário
 } NodeType;
 
 // Estrutura para um nó da AST
 typedef struct ASTNode {
     NodeType type;
+    char *tipo_dado;
     char *valor; // Para números (como string), identificadores, operadores
     int child_count;
     struct ASTNode **filhos; // Para operandos ou subárvores
     struct ASTNode *proximo_comando; // Para listas de comandos em um programa
+
+    int is_array;       // Um booleano (0 ou 1) para sabermos se é um vetor
+    int array_size;     // Para guardar o tamanho do vetor
 } ASTNode;
 
 // Função auxiliar para criar nós
 ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo);
 
 void imprimir_ast(ASTNode *no, int nivel);
+
+ASTNode* criar_no_declaracao(const char* tipo_dado, const char* nome_var);
+
+ASTNode* criar_no_declaracao_com_valor(const char* tipo_dado, const char* nome_var, ASTNode* valor_inicial);
+
+ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, ASTNode* lista_inicializadores);
+
+ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos);
 
 #endif

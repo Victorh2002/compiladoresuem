@@ -1,5 +1,12 @@
+int x[] = [1, 2 + 2];
+
+int test(int x){
+
+}
+
 int main() {
-    var13 = 10 + var2 + (var3 + var4);
-    var14 =var8 + var7 + var6 + var5;
-    var15=var12 + var11 + var10 + var9;
+    var13 = 10 + var2 * (var3 / var4) - var5;
+    int x = 1;
+    x = [1, 2 + 2];
+    return x;
 }
