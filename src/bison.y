@@ -20,9 +20,9 @@
 
 /* Tokens que carregam um valor string (do lexer) */
 %token <str> t_id t_num t_decimal
-%token <str> t_int t_float t_char
+%token <str> t_int t_float t_char t_string
 %token <str> t_mais t_menos t_asteristico t_barra t_and t_or t_maior t_menor t_maiorigual t_menorigual t_igualigual t_diferente t_negacao
-%token <str> t_class t_func t_palavra
+%token <str> t_class t_palavra
 
 /* Tokens simples que não carregam valor */
 %token t_igual t_pontvirgula t_virgula t_return
@@ -50,8 +50,8 @@
 /* Regras que retornam um ponteiro para um nó da AST */
 %type <no_ast> declaracoes declaracao declaracao_funcao declaracao_variavel
 %type <no_ast> lista_comandos comandos expressao valor variavel
-%type <no_ast> lista_inicializacao lista_elementos
-%type <no_ast> lista_parametros parametro comando_return comando_if bloco_comandos comando_while
+%type <no_ast> lista_inicializacao lista_elementos lista_membros membro declaracao_classe
+%type <no_ast> lista_parametros parametro comando_return comando_if bloco_comandos comando_while chamada_funcao
 
 /* Regra que retorna o lexema (string) do tipo */
 %type <str> tipo
@@ -93,7 +93,8 @@
 
     declaracao:
         declaracao_funcao {$$ = $1;} |
-        declaracao_variavel {$$ = $1;}
+        declaracao_variavel {$$ = $1;} |
+        declaracao_classe {$$ = $1;}
 
 /* Regra para uma declaração de função completa. */
 
@@ -173,6 +174,40 @@
             if ($1) free($1);
             if ($2) free($2);
         }
+
+/* Regra principal para a declaração de classe */
+
+    declaracao_classe:
+        t_class t_id t_chaveabri lista_membros t_chavefecha {
+            // $2 é o nome da classe (char*)
+            // $4 é a lista ligada de nós dos membros (ASTNode*)
+            $$ = criar_no_classe($2, $4);
+            if ($2) free($2);
+        }
+    
+/* Regra para a lista de membros dentro da classe */
+
+    lista_membros:
+        %empty { $$ = NULL; } | 
+        lista_membros membro {
+            // Adiciona o novo comando à lista (simplesmente encadeando)
+            ASTNode *lista = $1;
+            if (lista == NULL) {
+                $$ = $2; // $2 é o novo comando
+            } else {
+                ASTNode *atual = lista;
+                while (atual->proximo_comando != NULL) {
+                    atual = atual->proximo_comando;
+                }
+                atual->proximo_comando = $2; // $2 é o novo comando
+                $$ = lista;
+            }
+        }
+
+/* Regra que define o que pode existir dentro de uma */
+    membro:
+        declaracao_variavel { $$ = $1; } | // Reutiliza a regra de declaração de variável! 
+        declaracao_funcao   { $$ = $1; } // Reutiliza a regra de declaração de função!
 
 /* Regras para parsear listas de inicialização de vetores: [el1, el2, ...] */
 
@@ -386,7 +421,9 @@
     tipo:
         t_int {$$ = $1;} |
         t_float {$$ = $1;} |
-        t_char {$$ = $1;}
+        t_char {$$ = $1;} |
+        t_string {$$ = $1;} |
+        t_id {$$ = $1;}
 
 /* Uma variável é um identificador. */
 
@@ -407,8 +444,28 @@
             $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL);
             if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
+        t_palavra {
+            $$ = criar_no(NODE_TYPE_STRING, $1, NULL, 0, NULL);
+            if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
+        } |
         variavel {$$ = $1;} |
         t_parentesabri expressao t_parentesfecha { $$ = $2; } |
-        lista_inicializacao {$$ = criar_no_literal_vetor($1);}
+        lista_inicializacao {$$ = criar_no_literal_vetor($1);} |
+        chamada_funcao {$$ = $1;}
+
+    chamada_funcao:
+    // Caso 1: Chamada sem argumentos. Ex: teste()
+    t_id t_parentesabri t_parentesfecha {
+        // $1 é o nome da função (char*)
+        $$ = criar_no(NODE_TYPE_FUNCAO_CALL, $1, NULL, 0, NULL);
+        if ($1) free($1);
+    }
+    // Caso 2: Chamada com argumentos. Ex: soma(10, x)
+    | t_id t_parentesabri lista_elementos t_parentesfecha {
+        // $1 é o nome da função (char*)
+        // $3 é a lista ligada de nós das expressões dos argumentos
+        $$ = criar_no_chamada_funcao($1, $3);
+        if ($1) free($1);
+    }
 
 %%

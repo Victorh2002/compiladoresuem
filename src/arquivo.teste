@@ -1,5 +1,10 @@
+class Pessoa {
+    
+}
+
 int main() {
-    while(!(A + B)) {
-        teste = 1;
-    }
+    string teste = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    int x;
+    Pessoa pessoa;
+    pessoa = teste();
 }

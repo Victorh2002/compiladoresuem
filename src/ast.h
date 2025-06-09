@@ -19,6 +19,9 @@ typedef enum {
     NODE_TYPE_RETURN,
     NODE_TYPE_IF,
     NODE_TYPE_WHILE,
+    NODE_TYPE_STRING,
+    NODE_TYPE_FUNCAO_CALL,
+    NODE_TYPE_CLASSE_DECL,
     // Adicione outros tipos de nós conforme necessário
 } NodeType;
 
@@ -49,5 +52,9 @@ ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, 
 ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos);
 
 ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNode* filhos[], int num_filhos);
+
+ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumentos);
+
+ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros);
 
 #endif

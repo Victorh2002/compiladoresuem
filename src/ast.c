@@ -99,8 +99,18 @@ void imprimir_ast(ASTNode *no, int nivel) {
         case NODE_TYPE_OPERACAO_UNARIA:   
             printf("Operacao Unaria: %s\n", no->valor); 
             break;
+        case NODE_TYPE_STRING:             
+            printf("string: %s\n", no->valor); 
+            break;
+        case NODE_TYPE_FUNCAO_CALL:
+            printf("Chamada de Funcao: %s\n", no->valor);
+            break;
+        case NODE_TYPE_CLASSE_DECL:
+            printf("Declaracao de Classe: %s\n", no->valor);
+            break;
         default:                           
-            printf("Nó Desconhecido (%d)\n", no->type); break;
+            printf("Nó Desconhecido (%d)\n", no->type); 
+            break;
     }
 
     // --- 2. Imprime os filhos (recursão vertical) ---
@@ -215,4 +225,63 @@ ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNod
     novo_no->tipo_dado = tipo_retorno ? strdup(tipo_retorno) : NULL;
     
     return novo_no;
+}
+
+
+ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumentos) {
+    // Cria o nó "pai" para a chamada de função
+    ASTNode* no_chamada = criar_no(NODE_TYPE_FUNCAO_CALL, nome_func, NULL, 0, NULL);
+
+    // Converte a lista ligada de argumentos em um array de filhos
+    int contador = 0;
+    ASTNode* no_atual = lista_argumentos;
+    while (no_atual != NULL) {
+        contador++;
+        no_atual = no_atual->proximo_comando;
+    }
+
+    no_chamada->child_count = contador;
+    if (contador > 0) {
+        no_chamada->filhos = malloc(contador * sizeof(ASTNode*));
+        // ... (checagem de erro do malloc) ...
+
+        no_atual = lista_argumentos;
+        for (int i = 0; i < contador; i++) {
+            no_chamada->filhos[i] = no_atual;
+            ASTNode* proximo = no_atual->proximo_comando;
+            no_atual->proximo_comando = NULL;
+            no_atual = proximo;
+        }
+    }
+
+    return no_chamada;
+}
+
+ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros) {
+    // Cria o nó "pai" para a declaração da classe
+    ASTNode* no_classe = criar_no(NODE_TYPE_CLASSE_DECL, nome_classe, NULL, 0, NULL);
+
+    // Converte a lista ligada de membros em um array de filhos
+    int contador = 0;
+    ASTNode* no_atual = lista_membros;
+    while (no_atual != NULL) {
+        contador++;
+        no_atual = no_atual->proximo_comando;
+    }
+
+    no_classe->child_count = contador;
+    if (contador > 0) {
+        no_classe->filhos = malloc(contador * sizeof(ASTNode*));
+        // ... (checagem de erro do malloc) ...
+
+        no_atual = lista_membros;
+        for (int i = 0; i < contador; i++) {
+            no_classe->filhos[i] = no_atual;
+            ASTNode* proximo = no_atual->proximo_comando;
+            no_atual->proximo_comando = NULL;
+            no_atual = proximo;
+        }
+    }
+
+    return no_classe;
 }

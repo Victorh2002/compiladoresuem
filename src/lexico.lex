@@ -49,6 +49,11 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
         *string_buf_ptr++ = *yptr++;
     }
 }
+<texto>\r\n|\n|\r {
+    fprintf(stderr, "Erro na linha %ld: String não terminada (encontrada quebra de linha).\n", linha);
+    linha++;         // Incrementa o contador, pois consumimos uma quebra de linha
+    BEGIN(INITIAL);  // ABORTA o estado <texto> e volta ao estado normal
+}
 
 %{
 
@@ -60,6 +65,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 "int"       { lexeno(yytext); return t_int;    }
 "float"     { lexeno(yytext); return t_float;  }
 "char"      { lexeno(yytext); return t_char;   }
+"string"    { lexeno(yytext); return t_string; }
 "class"     { return t_class;       }
 "while"     { return t_while;       }
 "if"        { return t_if;          }
