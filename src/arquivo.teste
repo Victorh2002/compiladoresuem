@@ -1,12 +1,5 @@
-int x[] = [1, 2 + 2];
-
-int test(int x){
-
-}
-
 int main() {
-    var13 = 10 + var2 * (var3 / var4) - var5;
-    int x = 1;
-    x = [1, 2 + 2];
-    return x;
+    while(!(A + B)) {
+        teste = 1;
+    }
 }

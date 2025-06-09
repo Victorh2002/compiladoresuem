@@ -21,22 +21,28 @@
 /* Tokens que carregam um valor string (do lexer) */
 %token <str> t_id t_num t_decimal
 %token <str> t_int t_float t_char
-%token <str> t_mais t_menos t_asteristico t_barra t_and t_or
+%token <str> t_mais t_menos t_asteristico t_barra t_and t_or t_maior t_menor t_maiorigual t_menorigual t_igualigual t_diferente t_negacao
 %token <str> t_class t_func t_palavra
 
 /* Tokens simples que não carregam valor */
 %token t_igual t_pontvirgula t_virgula t_return
 %token t_parentesabri t_parentesfecha t_chaveabri t_chavefecha
 %token t_vetorabri t_vetorfecha
-%token t_for t_while t_if t_else t_switch
+%token t_while t_if t_else
 
 /* =================================================================== */
 /* --- Precedência e Associatividade de Operadores --- */
 /* =================================================================== */
 /* Menor precedência (declarado primeiro) para maior precedência */
-%right t_igual
-%left  t_mais t_menos
-%left  t_asteristico t_barra
+
+%right t_igual                                      // 1. Atribuição (a mais fraca)
+%left  t_or                                         // 2. OU lógico
+%left  t_and                                        // 3. E lógico
+%left  t_igualigual t_diferente                     // 4. Igualdade (==, !=)
+%left  t_maior t_menor t_maiorigual t_menorigual    // 5. Comparações (<, >, <=, >=)
+%left  t_mais t_menos                               // 6. Soma e Subtração
+%left  t_asteristico t_barra                        // 7. Multiplicação e Divisão
+%right t_negacao                                    // 8. Negação unária '!' (a mais forte)
 
 /* =================================================================== */
 /* --- Tipos dos Não-Terminais --- */
@@ -45,7 +51,7 @@
 %type <no_ast> declaracoes declaracao declaracao_funcao declaracao_variavel
 %type <no_ast> lista_comandos comandos expressao valor variavel
 %type <no_ast> lista_inicializacao lista_elementos
-%type <no_ast> lista_parametros parametro comando_return
+%type <no_ast> lista_parametros parametro comando_return comando_if bloco_comandos comando_while
 
 /* Regra que retorna o lexema (string) do tipo */
 %type <str> tipo
@@ -115,7 +121,7 @@
             }
             
             // Criamos um nó para a declaração da função, usando o nome dela ($2)
-            $$ = criar_no(NODE_TYPE_FUNCAO_DECL, $2, filhos, num_filhos, NULL);
+            $$ = criar_no_funcao($1, $2, filhos, num_filhos);
 
             if($1) free($1); 
             if($2) free($2);
@@ -266,7 +272,19 @@
     comandos:
         declaracao_variavel {$$ = $1;} |
         expressao t_pontvirgula {$$ = $1;} |
-        comando_return { $$ = $1; }
+        comando_return {$$ = $1;} |
+        comando_if {$$ = $1;} |
+        comando_while {$$ = $1;}
+    comando_if:
+        t_if t_parentesabri expressao t_parentesfecha bloco_comandos {
+            ASTNode* filhos[] = {$3, $5}; // Filho 0: condição, Filho 1: corpo do if
+            $$ = criar_no(NODE_TYPE_IF, "if", filhos, 2, NULL);
+        } |
+        // Forma 2: if-else  
+        t_if t_parentesabri expressao t_parentesfecha bloco_comandos t_else bloco_comandos {
+            ASTNode* filhos[] = {$3, $5, $7}; // Filho 0: condição, Filho 1: corpo do if, Filho 2: corpo do else
+            $$ = criar_no(NODE_TYPE_IF, "if-else", filhos, 3, NULL);
+        }
     comando_return:
         // Caso 1: return com uma expressão, ex: return x + 5;
         t_return expressao t_pontvirgula {
@@ -277,6 +295,17 @@
         | t_return t_pontvirgula {
             $$ = criar_no(NODE_TYPE_RETURN, "return", NULL, 0, NULL);
         }
+    comando_while:
+        t_while t_parentesabri expressao t_parentesfecha bloco_comandos {
+            // Muito parecido com o 'if' simples
+            ASTNode* filhos[] = {$3, $5}; // Filho 0: condição, Filho 1: corpo do loop
+            $$ = criar_no(NODE_TYPE_WHILE, "while", filhos, 2, NULL);
+        }
+    bloco_comandos:
+        t_chaveabri lista_comandos t_chavefecha {
+            // O resultado é a própria lista de comandos
+            $$ = $2;
+        }
 
 /* Regras de Expressão (precedência definida no topo) */
 
@@ -286,25 +315,70 @@
             ASTNode* filhos[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_ATRIBUICAO, "=", filhos, 2, NULL);
         } |
-        expressao t_mais valor {
+        expressao t_mais expressao {
             ASTNode *filhos[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
             if ($2) free($2);
         } |
-        expressao t_menos valor {
+        expressao t_menos expressao {
             ASTNode *filhos[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
             if ($2) free($2);
         } |
-        expressao t_asteristico valor {
+        expressao t_asteristico expressao {
             ASTNode *filhos[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
             if ($2) free($2);
         } |
-        expressao t_barra valor {
+        expressao t_barra expressao {
             ASTNode *filhos[] = {$1, $3};
             $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
             if ($2) free($2);
+        } |
+        expressao t_maior expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_menor expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_maiorigual expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_menorigual expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_igualigual expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_diferente expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_and expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        expressao t_or expressao {
+            ASTNode *filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            if ($2) free($2);
+        } |
+        t_negacao expressao {
+            ASTNode *filhos[] = {$2};
+            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
+            if ($2) free($1);
         }
         
 /* Um tipo de dado. */

@@ -59,13 +59,27 @@ void imprimir_ast(ASTNode *no, int nivel) {
     }
 
     switch (no->type) {
-        case NODE_TYPE_PROGRAMA:           printf("Programa\n"); break;
-        case NODE_TYPE_NUMERO:             printf("Numero: %s\n", no->valor); break;
-        case NODE_TYPE_IDENTIFICADOR:      printf("ID: %s\n", no->valor); break;
-        case NODE_TYPE_OPERACAO_BINARIA:   printf("Operacao: %s\n", no->valor); break;
-        case NODE_TYPE_FUNCAO_DECL:        printf("Funcao: %s (Tipo: %s)\n", no->valor, no->tipo_dado); break;
-        case NODE_TYPE_ATRIBUICAO:         printf("Atribuicao: =\n"); break;
-        case NODE_TYPE_ARRAY_LITERAL:      printf("Literal de Vetor: []\n"); break;
+        case NODE_TYPE_PROGRAMA:           
+            printf("Programa\n"); 
+            break;
+        case NODE_TYPE_NUMERO:             
+            printf("Numero: %s\n", no->valor); 
+            break;
+        case NODE_TYPE_IDENTIFICADOR:      
+            printf("ID: %s\n", no->valor); 
+            break;
+        case NODE_TYPE_OPERACAO_BINARIA:   
+            printf("Operacao: %s\n", no->valor); 
+            break;
+        case NODE_TYPE_FUNCAO_DECL:        
+            printf("Funcao: %s (Tipo: %s)\n", no->valor, no->tipo_dado); 
+            break;
+        case NODE_TYPE_ATRIBUICAO:         
+            printf("Atribuicao: =\n"); 
+            break;
+        case NODE_TYPE_ARRAY_LITERAL:      
+            printf("Literal de Vetor: []\n"); 
+            break;
         case NODE_TYPE_VAR_DECL:
             printf("Declaracao Variavel: %s (Tipo: %s", no->valor, no->tipo_dado);
             if (no->is_array) {
@@ -74,9 +88,19 @@ void imprimir_ast(ASTNode *no, int nivel) {
             printf(")\n");
             break;
         case NODE_TYPE_RETURN:
-             printf("Return\n");
-             break;
-        default:                           printf("Nó Desconhecido (%d)\n", no->type); break;
+            printf("Return\n");
+            break;
+        case NODE_TYPE_IF:                     
+            printf("Comando %s\n", no->valor); 
+            break;
+        case NODE_TYPE_WHILE:                     
+            printf("Comando while\n"); 
+            break;
+        case NODE_TYPE_OPERACAO_UNARIA:   
+            printf("Operacao Unaria: %s\n", no->valor); 
+            break;
+        default:                           
+            printf("Nó Desconhecido (%d)\n", no->type); break;
     }
 
     // --- 2. Imprime os filhos (recursão vertical) ---
@@ -178,4 +202,17 @@ ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos) {
     }
 
     return no_literal;
+}
+
+/**
+ * @brief Função de conveniência para criar um nó de declaração de função.
+ */
+ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNode* filhos[], int num_filhos) {
+    // Reutilizamos a função base para criar o nó e anexar os filhos (corpo, parâmetros)
+    ASTNode* novo_no = criar_no(NODE_TYPE_FUNCAO_DECL, nome_func, filhos, num_filhos, NULL);
+    
+    // E agora, preenchemos o campo específico do tipo de dado, que faltava antes.
+    novo_no->tipo_dado = tipo_retorno ? strdup(tipo_retorno) : NULL;
+    
+    return novo_no;
 }

@@ -56,18 +56,16 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 
 %}
 
-"return"    { return t_return; }
+"return"    { return t_return;      }
 "int"       { lexeno(yytext); return t_int;    }
 "float"     { lexeno(yytext); return t_float;  }
 "char"      { lexeno(yytext); return t_char;   }
-"class"     { return t_class;  }
-"for"       { return t_for;    }
-"while"     { return t_while;  }
-"if"        { return t_if;     }
-"else"      { return t_else;   }
-"switch"    { return t_switch; }
-"and"       { return t_and;    }
-"or"        { return t_or;     }
+"class"     { return t_class;       }
+"while"     { return t_while;       }
+"if"        { return t_if;          }
+"else"      { return t_else;        }
+"or"        { return t_or;          }
+"and"       { return t_and;         }
 
 %{
 
@@ -76,6 +74,13 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 
 %}
 
+">="        { lexeno(yytext); return t_maiorigual;  }
+"<="        { lexeno(yytext); return t_menorigual;  }
+">"         { lexeno(yytext); return t_maior;       }
+"<"         { lexeno(yytext); return t_menor;       }
+"=="        { lexeno(yytext); return t_igualigual;  }
+"!="        { lexeno(yytext); return t_diferente;   }
+"!"         { lexeno(yytext); return t_negacao;     }
 "="         { return t_igual;       }
 "+"         { lexeno(yytext); return t_mais; } // Ação mantida pois o valor é usado na AST
 "-"         { lexeno(yytext); return t_menos; }
@@ -107,7 +112,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 
 %}
 
-[ \t]+          { /* Ignora espaços e tabs */ }
+[ \t]+         { /* Ignora espaços e tabs */ }
 \r\n|\n|\r     { linha++; }
 
 .               { fprintf(stderr, "Erro Lexico: Caractere invalido '%c' na linha %ld\n", *yytext, linha); }
