@@ -3,7 +3,7 @@
 ## Enunciado
 
 Equipe
-- Victor Hugo Franciscon ra12077
+- Victor Hugo Franciscon ra120177
 - William Massashi Ito Yoshida ra117497
 
 Na disciplina de compiladores vimos que um compilador é dividido entre o
@@ -50,25 +50,18 @@ Teste de comparação:
 ```
 Estrutura de repetição
 ```
-for (int i; expressao ; i++){
-	commnad;
-}
 
 while( expressao ){
 }
 ```
 Estrutura condicionais
 ```
-expressao ? var1 : var2; 
 if{} else if  {} else {}
-switch(){ case default}
 ```
 
 Suporte a classe (sem herança, polimorfismo e encapsulamento)
 ```
 class  var1 {
- 	init(){ return;}
-destructor() {}
 (tipo) funcsome(){}
 }
 ```
