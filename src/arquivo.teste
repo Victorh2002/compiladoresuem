@@ -1,26 +1,10 @@
- operadores
-+
--
-/
-*
-"asdfasdfa"
-comentarios
-/*
-TTTTTTTTTT
-TTTTTTT
-comentrio
-teste
-*/
+class Pessoa {
+    
+}
 
-tipos
-char
-for
-aa
-
-aa aa
-var1  var2 var3
-while
-
-23.3
-23
-
+int main() {
+    string teste = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    int x;
+    Pessoa pessoa;
+    pessoa = teste();
+}

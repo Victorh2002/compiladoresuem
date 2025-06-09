@@ -1,81 +1,126 @@
 %option noyywrap
 %{
-	#include <string.h>
-    #include "bison.tab.h"
-	extern long linha;
+    #include <string.h>
+    #include "ast.h"
+    #include "bison.tab.h" // Essencial para conhecer os tokens
+
+    // Macro para facilitar a atribuição de lexemas
+    #define lexeno(val) (yylval.str = strdup(val))
+    
+    // Variáveis globais
+    long linha = 1;
+    char string_buf[1024];
+    char *string_buf_ptr;
 %}
 
+/* --- Definições de Nomes (Aliases) --- */
+numero  [0-9]+
+decimal [0-9]+\.[0-9]+
+id      [a-zA-Z_][a-zA-Z0-9_]*
 
-texto [a-zA-Z]
-numero [0-9]
-decimal [0-9]*.[0-9]
-espaco [" "\t]
-novalinha [\n]
-variavel [a-zA-Z][a-zA-Z0-9]*
-aberturacomentario [/][*]
-fechamentocomentario [*][/]
-
-/*subscanner*/
+/* --- Definição de Estados para Comentários e Strings --- */
 %x comentario 
 %x texto
-%% /* definições de toke para o flex procurar*/
-{aberturacomentario} {BEGIN(comentario);}
-<comentario>{fechamentocomentario} {BEGIN(INITIAL); /*É um escape do sub scanner 'comentario' - fim de comentário*/}
-<comentario>[^*\n]+ 
-<comentario>"*"
-<comentario>{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
 
-\" {BEGIN(texto);}
-<texto>\" {BEGIN(INITIAL);}
-<texto>. {;}
+%{
+/* =================================================================== */
+/* --- Regras Léxicas --- */
+/* =================================================================== */
 
-
-
-
-"=" { yylval= strdup(yytext); return t_igual;}
-"+" { yylval= strdup(yytext); return t_mais;}
-"-" { yylval= strdup(yytext); return t_menos;}
-"*" { yylval= strdup(yytext); return t_asteristico;}
-"/" { yylval= strdup(yytext); return t_barra;}
-
-int { yylval= strdup(yytext); return t_int;}
-float { yylval= strdup(yytext); return t_float;}
-char { yylval= strdup(yytext); return t_char;}
-"["  {yylval= strdup(yytext); return t_vetorabri;}
-"]" { yylval= strdup(yytext); return t_vetorfecha;}
-
-for {return t_for;}
-
-{numero}+ { yylval= strdup(yytext);  return t_num;}
-{decimal} { yylval= strdup(yytext);  return t_decimal;}
-{texto}+ { yylval= strdup(yytext);  return t_palavra;}
-{variavel} {yylval=strdup(yytext);;return t_variavel;} 
-{novalinha} {linha=linha+1; /* não retornar token, apenas incrementa a variável de controle*/}
-{espaco} /* Não faz nada, apenas consome*/
-
-
-. { printf("\'%c\' (linha %d) eh um caractere misterio não usando na linguagem\n", *yytext, linha); }
+/* --- Controle de Estados (Comentários, Strings) --- */  
+%}
 %%
+"/*"        { BEGIN(comentario); }
+<comentario>"*/"        { BEGIN(INITIAL); }
+<comentario>[^*\n]+     { /* Consome texto do comentário */ }
+<comentario>"*"         { /* Consome asteriscos dentro do comentário */ }
+<comentario>\r\n|\n|\r   { linha++; }
 
-
-void yyerror (char const s){
-	fprintf(stderr, "%s\n\n",s);
+\"          { string_buf_ptr = string_buf; BEGIN(texto); }
+<texto>\"   { 
+    *string_buf_ptr = '\0';
+    lexeno(string_buf);
+    BEGIN(INITIAL);
+    return t_palavra; // NOTA: Token corrigido
+}
+<texto>[^\"\n]+ {
+    char *yptr = yytext;
+    while (*yptr && string_buf_ptr < string_buf + sizeof(string_buf) - 1) {
+        *string_buf_ptr++ = *yptr++;
+    }
+}
+<texto>\r\n|\n|\r {
+    fprintf(stderr, "Erro na linha %ld: String não terminada (encontrada quebra de linha).\n", linha);
+    linha++;         // Incrementa o contador, pois consumimos uma quebra de linha
+    BEGIN(INITIAL);  // ABORTA o estado <texto> e volta ao estado normal
 }
 
+%{
 
-int main(int argc, char *arqv[]){
-	for(int i = 1; i < argc ; i++){
-		if( strcmp(arqv[i], "-e") == 0 && i<argc){
-			yyin = fopen(arqv[i+1],"r");
-			if(!yyin){
-				printf("Não foi possível abrir o arquivo %s\n",arqv[i+1]);
-				exit(-1);
-			}
-			i = i+1;
-		}else if(strcmp(arqv[i],"-s") == 0 && i<argc){
-			yyout = fopen(arqv[i+1],"w");
-			i = i+1;
-		}
-	}
-	return yyparse();
-}
+/* --- Palavras-chave --- */
+
+%}
+
+"return"    { return t_return;      }
+"int"       { lexeno(yytext); return t_int;    }
+"float"     { lexeno(yytext); return t_float;  }
+"char"      { lexeno(yytext); return t_char;   }
+"string"    { lexeno(yytext); return t_string; }
+"class"     { return t_class;       }
+"while"     { return t_while;       }
+"if"        { return t_if;          }
+"else"      { return t_else;        }
+"or"        { return t_or;          }
+"and"       { return t_and;         }
+
+%{
+
+/* --- Operadores e Pontuação --- */
+/* Para estes, o parser só precisa saber o tipo, não o valor "texto" */
+
+%}
+
+">="        { lexeno(yytext); return t_maiorigual;  }
+"<="        { lexeno(yytext); return t_menorigual;  }
+">"         { lexeno(yytext); return t_maior;       }
+"<"         { lexeno(yytext); return t_menor;       }
+"=="        { lexeno(yytext); return t_igualigual;  }
+"!="        { lexeno(yytext); return t_diferente;   }
+"!"         { lexeno(yytext); return t_negacao;     }
+"="         { return t_igual;       }
+"+"         { lexeno(yytext); return t_mais; } // Ação mantida pois o valor é usado na AST
+"-"         { lexeno(yytext); return t_menos; }
+"*"         { lexeno(yytext); return t_asteristico; }
+"/"         { lexeno(yytext); return t_barra; }
+"["         { return t_vetorabri;     }
+"]"         { return t_vetorfecha;    }
+"("         { return t_parentesabri;  }
+")"         { return t_parentesfecha; }
+"{"         { return t_chaveabri;     }
+"}"         { return t_chavefecha;    }
+";"         { return t_pontvirgula;   }
+","         { return t_virgula;       }
+
+%{
+
+/* --- Literais (Números e Identificadores) --- */
+/* Estes precisam do lexeno pois o valor é importante */
+
+%}
+
+{decimal}   { lexeno(yytext); return t_decimal; }
+{numero}    { lexeno(yytext); return t_num;     }
+{id}        { lexeno(yytext); return t_id;      }
+
+%{
+    
+/* --- Whitespace e Erros --- */
+
+%}
+
+[ \t]+         { /* Ignora espaços e tabs */ }
+\r\n|\n|\r     { linha++; }
+
+.               { fprintf(stderr, "Erro Lexico: Caractere invalido '%c' na linha %ld\n", *yytext, linha); }
+
+%%
