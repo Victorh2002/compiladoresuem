@@ -414,6 +414,11 @@
             ASTNode *filhos[] = {$2};
             $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
             if ($2) free($1);
+        } |
+        t_menos expressao {
+            ASTNode *filhos[] = {$2};
+            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
+            if ($2) free($1);
         }
         
 /* Um tipo de dado. */

@@ -3,8 +3,5 @@ class Pessoa {
 }
 
 int main() {
-    string teste = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    int x;
-    Pessoa pessoa;
-    pessoa = teste();
+    int teste = -2.2;
 }
