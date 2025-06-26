@@ -117,9 +117,6 @@ void imprimir_ast(ASTNode *no, int nivel) {
     for (int i = 0; i < no->child_count; i++) {
         imprimir_ast(no->filhos[i], nivel + 1);
     }
-    
-    // --- 3. Imprime o próximo comando (recursão horizontal) ---
-    imprimir_ast(no->proximo_comando, nivel);
 }
 
 
@@ -178,6 +175,34 @@ ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, 
     }
 
     return no_decl;
+}
+
+ASTNode* criar_no_programa(ASTNode* lista_elementos) {
+    ASTNode* no_programa = criar_no(NODE_TYPE_PROGRAMA, "Programa", NULL, 0, NULL);
+
+    int contador = 0;
+    ASTNode* no_atual = lista_elementos;
+    while (no_atual != NULL) {
+        contador++;
+        no_atual = no_atual->proximo_comando;
+    }
+
+    no_programa->child_count = contador;
+
+    if (contador > 0) {
+        no_programa->filhos = malloc(contador * sizeof(ASTNode*));
+        if (!no_programa->filhos) { exit(1); }
+
+        no_atual = lista_elementos;
+        for (int i = 0; i < contador; i++) {
+            no_programa->filhos[i] = no_atual;
+            ASTNode* proximo = no_atual->proximo_comando;
+            no_atual->proximo_comando = NULL; // Quebra a corrente da lista
+            no_atual = proximo;
+        }
+    }
+
+    return no_programa;
 }
 
 /**

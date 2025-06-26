@@ -49,6 +49,8 @@ ASTNode* criar_no_declaracao_com_valor(const char* tipo_dado, const char* nome_v
 
 ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, ASTNode* lista_inicializadores);
 
+ASTNode* criar_no_programa(ASTNode* lista_elementos);
+
 ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos);
 
 ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNode* filhos[], int num_filhos);

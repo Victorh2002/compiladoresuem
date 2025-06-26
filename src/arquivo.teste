@@ -1,10 +1,14 @@
 class Pessoa {
-    
+    int teste2;
 }
 
+float teste(int i) {
+
+}
+
+int teste1;
+Pessoa teste3;
+
 int main() {
-    string teste = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    int x;
-    Pessoa pessoa;
-    pessoa = teste();
+    int teste = -2.2;
 }

@@ -65,9 +65,7 @@
 %%
     programa:
         declaracoes {
-            ASTNode* filhos_do_programa[] = {$1};
-            int num_filhos = ($1 != NULL) ? 1 : 0;
-            raiz_ast = criar_no(NODE_TYPE_PROGRAMA, "Programa", filhos_do_programa, num_filhos, NULL);
+            raiz_ast = criar_no_programa($1);
         }
 
 /* Constrói uma lista ligada de declarações. */
@@ -411,6 +409,11 @@
             if ($2) free($2);
         } |
         t_negacao expressao {
+            ASTNode *filhos[] = {$2};
+            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
+            if ($2) free($1);
+        } |
+        t_menos expressao {
             ASTNode *filhos[] = {$2};
             $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
             if ($2) free($1);

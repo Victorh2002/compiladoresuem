@@ -5,7 +5,7 @@ LDFLAGS = -lfl
 EXECUTABLE = teste
 
 # Lista de todos os seus arquivos fonte .c que você criou
-SOURCES = main.c ast.c
+SOURCES = main.c ast.c symbol_table.c semantico.c
 
 # Arquivos gerados
 GENERATED_C = lex.yy.c bison.tab.c

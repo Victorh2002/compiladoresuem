@@ -2,15 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "symbol_table.h"
+#include "semantico.h"
 #include "bison.tab.h"
 
 extern long linha;
 extern FILE *yyin;
-extern FILE *yyout; 
+extern FILE *yyout;
+extern char *yytext;
+Symbol* tabela_de_simbolos = NULL; 
 ASTNode *raiz_ast = NULL;
 
 void yyerror (char const s){
-	fprintf(stderr, "Erro de Sintaxe na Linha %ld.\n", linha);
+    fprintf(stderr, "Erro de Sintaxe na Linha %ld: Token inesperado '%s'\n", linha, yytext);
 }
 
 int main(int argc, char *arqv[]){
@@ -34,6 +38,9 @@ int main(int argc, char *arqv[]){
             imprimir_ast(raiz_ast, 0);
             // free_ast(raiz_ast);
         }
+        preenche_tabela(raiz_ast, NULL);
+        imprimir_tabela_simbolos();
+
     } else { // Erro
         printf("Parsing falhou.\n");
     }
