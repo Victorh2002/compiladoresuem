@@ -1,14 +1,27 @@
 class Pessoa {
     int teste2;
+    int teste3;
+    int teste4;
+    int teste5(){
+
+    }
+    int teste6() {
+        teste(a);
+    }
 }
 
-float teste(int i) {
-
+int a(int t) {
+    int teste = 2;
 }
-
-int teste1;
-Pessoa teste3;
 
 int main() {
-    int teste = -2.2;
+    int a;
+    int b;
+    if(a) {
+
+    }
+
+    if(b) {
+
+    }
 }

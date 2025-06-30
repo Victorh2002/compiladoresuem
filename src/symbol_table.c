@@ -8,7 +8,7 @@ extern Symbol* tabela_de_simbolos;
  * Insere um novo símbolo. ANTES de inserir, verifica se já não existe
  * um símbolo com o mesmo nome NO MESMO ESCOPO.
  */
-void insert_symbol(const char* nome, const char* tipo, const char* nome_escopo) {
+void insert_symbol(const char* nome, const char* tipo, SymbolKind kind, const char* nome_escopo) {
     // Lógica de verificação ANTES de inserir
     Symbol* no_atual = tabela_de_simbolos;
     while (no_atual != NULL) {
@@ -23,7 +23,11 @@ void insert_symbol(const char* nome, const char* tipo, const char* nome_escopo) 
     // Se passou na verificação, cria e insere o novo símbolo no início da lista
     Symbol* novo_simbolo = (Symbol*) malloc(sizeof(Symbol));
     novo_simbolo->nome = strdup(nome);
-    novo_simbolo->tipo = strdup(tipo);
+    if (tipo)
+    {
+        novo_simbolo->tipo = strdup(tipo);
+    }
+    novo_simbolo->kind = kind;
     novo_simbolo->escopo = strdup(nome_escopo);
     novo_simbolo->proximo = tabela_de_simbolos;
     tabela_de_simbolos = novo_simbolo;
@@ -57,33 +61,37 @@ Symbol* lookup_symbol(const char* nome, const char* escopo_atual) {
     return NULL; // Não encontrou em nenhum escopo visível
 }
 
+const char* kind_para_string(SymbolKind kind) {
+    switch (kind) {
+        case SYM_VARIAVEL: return "Variavel";
+        case SYM_FUNCAO:   return "Funcao";
+        case SYM_CLASSE:   return "Classe";
+        default:           return "Desconhecido";
+    }
+}
+
 void imprimir_tabela_simbolos(void) {
     // Cria um ponteiro temporário para percorrer a lista sem modificar o original
     Symbol* no_atual = tabela_de_simbolos;
 
-    printf("\n.------------------------------------------------.\n");
-    printf("|              Tabela de Símbolos                |\n");
-    printf("+-----------------+-----------------+------------+\n");
-    printf("| ESCOPO          | TIPO            | NOME       |\n");
-    printf("+-----------------+-----------------+------------+\n");
+    printf("\n.------------------------------------------------------------------.\n");
+    printf("|                        Tabela de Símbolos                        |\n");
+    printf("+-----------------+-----------------+-----------------+------------+\n");
+    printf("| ESCOPO          | CATEGORIA       | TIPO            | NOME       |\n");
+    printf("+-----------------+-----------------+-----------------+------------+\n");
 
-    // Verifica se a tabela está vazia
     if (no_atual == NULL) {
-        printf("| (Tabela Vazia)                                 |\n");
+        printf("| (Tabela Vazia)                                                   |\n");
     } else {
-        // Percorre a lista ligada até o final
         while (no_atual != NULL) {
-            // Imprime os dados de cada símbolo de forma formatada
-            // %-15s significa: imprima a string, alinhada à esquerda, em um campo de 15 caracteres
-            printf("| %-15s | %-15s | %-10s |\n", 
+            printf("| %-15s | %-15s | %-15s | %-10s |\n", 
                    no_atual->escopo, 
-                   no_atual->tipo, 
+                   kind_para_string(no_atual->kind), // <-- Imprime a nova coluna
+                   no_atual->tipo ? no_atual->tipo : "N/A", // <-- O tipo de dado
                    no_atual->nome);
-
-            // Avança para o próximo símbolo na lista
             no_atual = no_atual->proximo;
         }
     }
     
-    printf("+-----------------+-----------------+------------+\n\n");
+    printf("+-----------------+-----------------+-----------------+------------+\n\n");
 }

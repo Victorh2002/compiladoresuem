@@ -43,13 +43,13 @@ ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int taman
 
 void imprimir_ast(ASTNode *no, int nivel);
 
+void lista_para_vetor(ASTNode* no_pai, ASTNode* lista);
+
 ASTNode* criar_no_declaracao(const char* tipo_dado, const char* nome_var);
 
 ASTNode* criar_no_declaracao_com_valor(const char* tipo_dado, const char* nome_var, ASTNode* valor_inicial);
 
 ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, ASTNode* lista_inicializadores);
-
-ASTNode* criar_no_programa(ASTNode* lista_elementos);
 
 ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos);
 
@@ -58,5 +58,7 @@ ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNod
 ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumentos);
 
 ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros);
+
+ASTNode* criar_no_programa(ASTNode* lista_declaracoes);
 
 #endif
