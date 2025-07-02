@@ -15,21 +15,21 @@ void preenche_tabela(ASTNode* raizAST, ASTNode* raizASTpai) {
         case NODE_TYPE_VAR_DECL:
             if (raizASTpai == NULL || strcmp("Programa",raizASTpai->valor) == 0)
             {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, "global");
+                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, "global", raizAST->linha);
             } else {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, raizASTpai->valor);
+                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, raizASTpai->valor, raizAST->linha);
             }
             break;
         case NODE_TYPE_FUNCAO_DECL:
             if (raizASTpai == NULL || strcmp("Programa",raizASTpai->valor) == 0)
             {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, "global");
+                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, "global", raizAST->linha);
             } else {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, raizASTpai->valor);
+                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, raizASTpai->valor, raizAST->linha);
             }
             break;
         case NODE_TYPE_CLASSE_DECL:
-            insert_symbol(raizAST->valor, NULL, SYM_CLASSE, "global");
+            insert_symbol(raizAST->valor, NULL, SYM_CLASSE, "global", raizAST->linha);
             break;
         default:
             break;

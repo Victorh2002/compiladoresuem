@@ -8,7 +8,7 @@ extern Symbol* tabela_de_simbolos;
  * Insere um novo símbolo. ANTES de inserir, verifica se já não existe
  * um símbolo com o mesmo nome NO MESMO ESCOPO.
  */
-void insert_symbol(const char* nome, const char* tipo, SymbolKind kind, const char* nome_escopo) {
+void insert_symbol(const char* nome, const char* tipo, SymbolKind kind, const char* nome_escopo, long linha) {
     // Lógica de verificação ANTES de inserir
     Symbol* no_atual = tabela_de_simbolos;
     while (no_atual != NULL) {
@@ -29,6 +29,7 @@ void insert_symbol(const char* nome, const char* tipo, SymbolKind kind, const ch
     }
     novo_simbolo->kind = kind;
     novo_simbolo->escopo = strdup(nome_escopo);
+    novo_simbolo->linha = linha;
     novo_simbolo->proximo = tabela_de_simbolos;
     tabela_de_simbolos = novo_simbolo;
 }
@@ -74,24 +75,25 @@ void imprimir_tabela_simbolos(void) {
     // Cria um ponteiro temporário para percorrer a lista sem modificar o original
     Symbol* no_atual = tabela_de_simbolos;
 
-    printf("\n.------------------------------------------------------------------.\n");
-    printf("|                        Tabela de Símbolos                        |\n");
-    printf("+-----------------+-----------------+-----------------+------------+\n");
-    printf("| ESCOPO          | CATEGORIA       | TIPO            | NOME       |\n");
-    printf("+-----------------+-----------------+-----------------+------------+\n");
+    printf("\n.--------------------------------------------------------------------------.\n");
+    printf("|                              Tabela de Símbolos                          |\n");
+    printf("+-----------------+-----------------+-----------------+--------------------+\n");
+    printf("| ESCOPO          | CATEGORIA       | TIPO            | NOME       | LINHA |\n");
+    printf("+-----------------+-----------------+-----------------+--------------------+\n");
 
     if (no_atual == NULL) {
         printf("| (Tabela Vazia)                                                   |\n");
     } else {
         while (no_atual != NULL) {
-            printf("| %-15s | %-15s | %-15s | %-10s |\n", 
-                   no_atual->escopo, 
-                   kind_para_string(no_atual->kind), // <-- Imprime a nova coluna
-                   no_atual->tipo ? no_atual->tipo : "N/A", // <-- O tipo de dado
-                   no_atual->nome);
+            printf("| %-15s | %-15s | %-15s | %-10s | %-5ld |\n", 
+                    no_atual->escopo, 
+                    kind_para_string(no_atual->kind), // <-- Imprime a nova coluna
+                    no_atual->tipo ? no_atual->tipo : "N/A", // <-- O tipo de dado
+                    no_atual->nome,
+                    no_atual->linha);
             no_atual = no_atual->proximo;
         }
     }
     
-    printf("+-----------------+-----------------+-----------------+------------+\n\n");
+    printf("+-----------------+-----------------+-----------------+------------+-------+\n\n");
 }

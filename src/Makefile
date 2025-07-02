@@ -64,4 +64,4 @@ lex.yy.c: lexico.lex bison.tab.h
 .PHONY: clean
 clean:
 	@echo "--> Limpando o projeto..."
-	rm -f $(EXECUTABLE) $(OBJECTS) lex.yy.c bison.tab.c bison.tab.h
+	rm -f $(EXECUTABLE) $(OBJECTS) lex.yy.c bison.tab.c bison.tab.h bison.output

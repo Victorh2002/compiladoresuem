@@ -1,7 +1,7 @@
 class Pessoa {
     int teste2;
     int teste3;
-    int teste4;
+    int teste4[] = [1];
     int teste5(){
 
     }
