@@ -1,11 +1,23 @@
 %option noyywrap
+%option yylineno
 %{
     #include <string.h>
     #include "ast.h"
     #include "bison.tab.h" // Essencial para conhecer os tokens
+    extern YYLTYPE yylloc;
 
     // Macro para facilitar a atribuição de lexemas
     #define lexeno(val) (yylval.str = strdup(val))
+
+    /**
+     * MACRO DE ATUALIZAÇÃO DE LOCALIZAÇÃO
+     * Esta macro será chamada ANTES de cada 'return'. Ela manualmente define
+     * a linha inicial e final do token atual para a linha que o 'yylineno' está marcando.
+     * Esta é a correção definitiva para o problema do @1.first_line.
+     */
+    #define YY_USER_ACTION \
+        yylloc.first_line = yylineno; \
+        yylloc.last_line = yylineno;
     
     // Variáveis globais
     long linha = 1;
@@ -119,8 +131,8 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 %}
 
 [ \t]+         { /* Ignora espaços e tabs */ }
-\r\n|\n|\r     { linha++; }
+\n|\r|\r\n     { linha++; }
 
-.               { fprintf(stderr, "Erro Lexico: Caractere invalido '%c' na linha %ld\n", *yytext, linha); }
+.               { fprintf(stderr, "Erro Lexico: Caractere invalido '%c' na linha %d\n", *yytext, yylineno); }
 
 %%

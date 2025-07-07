@@ -39,11 +39,6 @@ typedef struct ASTNode {
     int array_size;     // Para guardar o tamanho do vetor
 } ASTNode;
 
-typedef struct Tipo {
-    long linha;
-    char* tipo;
-} Tipo;
-
 // Função auxiliar para criar nós
 ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo);
 

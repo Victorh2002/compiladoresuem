@@ -6,15 +6,14 @@
     int yylex (void);
     void yyerror (char const *);
     extern FILE *yyout;
-    extern long linha;
     extern ASTNode *raiz_ast;
-    Tipo* tipo;
 %}
+
+%define parse.error verbose
 
 %union {
     char* str;
     ASTNode* no_ast;
-    Tipo* tipo;
 }
 
 /* =================================================================== */
@@ -57,8 +56,7 @@
 %type <no_ast> lista_parametros parametro comando_return comando_if bloco_comandos comando_while chamada_funcao
 
 /* Regra que retorna o lexema (string) do tipo */
-%type <str> tipo
-%type <tipo> class
+%type <str> tipo class
 
 /* =================================================================== */
 /* --- Regras da Gramática --- */
@@ -124,7 +122,7 @@
             }
             
             // Criamos um nó para a declaração da função, usando o nome dela ($2)
-            $$ = criar_no_funcao($1, $2, filhos, num_filhos, linha);
+            $$ = criar_no_funcao($1, $2, filhos, num_filhos, @1.first_line);
 
             if($1) free($1); 
             if($2) free($2);
@@ -136,7 +134,7 @@
         // ex: int x;
         tipo t_id t_pontvirgula {
             // Criamos um nó do tipo VAR_DECL, passando o tipo e o nome
-            $$ = criar_no_declaracao($1, $2, linha);
+            $$ = criar_no_declaracao($1, $2, @1.first_line);
 
             // Liberamos as strings que já foram copiadas/usadas
             if ($1) free($1);
@@ -147,7 +145,7 @@
             // Criamos o nó de declaração e passamos a árvore da expressão
             // como um "filho" do nó de declaração.
             ASTNode* filhos[] = {$4};
-            $$ = criar_no_declaracao_com_valor($1, $2, filhos[0], linha);
+            $$ = criar_no_declaracao_com_valor($1, $2, filhos[0], @1.first_line);
 
             // Liberamos as strings que já foram copiadas/usadas
             if ($1) free($1);
@@ -156,7 +154,7 @@
         // ex: int v[10];
         tipo t_id t_vetorabri t_num t_vetorfecha t_pontvirgula {            
             // Criamos o nó e depois o modificamos
-            ASTNode* no_vetor = criar_no_declaracao($1, $2, linha);
+            ASTNode* no_vetor = criar_no_declaracao($1, $2, @1.first_line);
             no_vetor->is_array = 1; // Marca como vetor
             no_vetor->array_size = atoi($4); // Converte a string do tamanho para inteiro
 
@@ -171,7 +169,7 @@
             // $1 é o tipo (char*), $2 é o nome (char*),
             // $6 é a lista ligada de nós da AST com os valores da lista
 
-            $$ = criar_no_declaracao_vetor($1, $2, $6, linha);
+            $$ = criar_no_declaracao_vetor($1, $2, $6, @1.first_line);
 
             if ($1) free($1);
             if ($2) free($2);
@@ -183,7 +181,7 @@
         class t_id t_chaveabri lista_membros t_chavefecha {
             // $2 é o nome da classe (char*)
             // $4 é a lista ligada de nós dos membros (ASTNode*)
-            $$ = criar_no_classe($2, $4, linha);
+            $$ = criar_no_classe($2, $4, @1.first_line);
             if ($2) free($2);
         }
     
@@ -253,7 +251,7 @@
 
     parametro:
         tipo t_id {
-            $$ = criar_no_declaracao($1, $2, linha);
+            $$ = criar_no_declaracao($1, $2, @1.first_line);
             if ($1) free($1);
             if ($2) free($2);
         }
@@ -433,12 +431,7 @@
         t_id {$$ = $1;}
 
     class:
-        t_class {
-            strcpy(tipo->tipo, "class");
-            printf("%s", tipo->tipo);
-            tipo->linha = linha;
-            $$ = tipo;
-        }
+        t_class {$$ = $1;}
 
 /* Uma variável é um identificador. */
 

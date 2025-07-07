@@ -1,27 +1,13 @@
-class Pessoa {
-    int teste2;
-    int teste3;
-    int teste4[] = [1];
-    int teste5(){
-
+class Pessoa{
+    int p(int teste) {
+        
     }
-    int teste6() {
-        teste(a);
-    }
-}
-
-int a(int t) {
-    int teste = 2;
 }
 
 int main() {
     int a;
-    int b;
-    if(a) {
-
-    }
-
-    if(b) {
-
+    a = 1;
+    if(a){
+        int teste;
     }
 }
