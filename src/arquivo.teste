@@ -5,9 +5,9 @@ class Pessoa{
 }
 
 int main() {
-    int a;
-    a = 1;
+    int a = 1;
+    int b;
     if(a){
-        int teste;
+        a = b + b + b;
     }
 }

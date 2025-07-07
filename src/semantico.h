@@ -7,8 +7,7 @@
 #include "ast.h"
 #include "symbol_table.h"
 
-void preenche_tabela(ASTNode* raizAST, ASTNode* raizASTpai);
-void contagem_escopo(ASTNode* raizAST, TabelaDeSimbolos tabela);
+void verifica_tipagem(ASTNode* raizAST, char* tipo, TabelaDeSimbolos* tabela);
 void teste(ASTNode* raizAST, TabelaDeSimbolos* tabela);
 
 #endif

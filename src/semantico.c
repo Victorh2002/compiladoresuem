@@ -6,41 +6,29 @@
 #include "symbol_table.h"
 #include "semantico.h"
 
-/*
-void preenche_tabela(ASTNode* raizAST, ASTNode* raizASTpai) {
+bool erro_semantico = false;
+bool tipo_igual = true;
+
+void verifica_tipagem(ASTNode* raizAST, char* tipo, TabelaDeSimbolos* tabela) {
     if (raizAST == NULL) {
         return;
     }
-    
-    switch (raizAST->type)
-    {
-        case NODE_TYPE_VAR_DECL:
-            if (raizASTpai == NULL || strcmp("Programa",raizASTpai->valor) == 0)
+
+    if (raizAST->type == NODE_TYPE_IDENTIFICADOR) {
+        Symbol* ID = buscar_simbolo(tabela, raizAST->valor);
+        if(ID){
+            if (strcmp(ID->tipo, tipo) != 0)
             {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, "global", raizAST->linha);
-            } else {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_VARIAVEL, raizASTpai->valor, raizAST->linha);
+                tipo_igual = false;   
             }
-            break;
-        case NODE_TYPE_FUNCAO_DECL:
-            if (raizASTpai == NULL || strcmp("Programa",raizASTpai->valor) == 0)
-            {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, "global", raizAST->linha);
-            } else {
-                insert_symbol(raizAST->valor, raizAST->tipo_dado, SYM_FUNCAO, raizASTpai->valor, raizAST->linha);
-            }
-            break;
-        case NODE_TYPE_CLASSE_DECL:
-            insert_symbol(raizAST->valor, NULL, SYM_CLASSE, "global", raizAST->linha);
-            break;
-        default:
-            break;
+        }
     }
-    
-    for (int i = 0; i < raizAST->child_count; i++) {
-        preenche_tabela(raizAST->filhos[i], raizAST);
+
+    for (int i = 0; i < raizAST->child_count; i++)
+    {      
+        verifica_tipagem(raizAST->filhos[i], tipo, tabela);
     }
-}*/
+}
 
 void teste(ASTNode* raizAST, TabelaDeSimbolos* tabela) {
     if (raizAST == NULL) {
@@ -100,11 +88,37 @@ void teste(ASTNode* raizAST, TabelaDeSimbolos* tabela) {
     }
 
     // Inserir variáveis locais no escopo atual
-    else if (raizAST->type == NODE_TYPE_VAR_DECL && buscar_simbolo(tabela, raizAST->valor) == NULL) {
-        inserir_simbolo(tabela, raizAST->valor, raizAST->tipo_dado,
+    else if (raizAST->type == NODE_TYPE_VAR_DECL) {
+        if (tabela->nivel_escopo_atual != -1) {
+            inserir_simbolo(tabela, raizAST->valor, raizAST->tipo_dado,
                         SYM_VARIAVEL,
                         raizAST->linha, 0); // Local
+        } else {
+            inserir_simbolo(tabela, raizAST->valor, raizAST->tipo_dado,
+                        SYM_VARIAVEL,
+                        raizAST->linha, 1); // Global
+        }
+        
         imprimir_tabela_simbolos(*tabela);
+    }
+
+    else if (raizAST->type == NODE_TYPE_ATRIBUICAO)
+    {
+        Symbol* id = buscar_simbolo(tabela, raizAST->filhos[0]->valor);
+        if (!id)
+        {
+            printf("ID '%s' não existe semelhante ao mundial do Palmeiras!\n", raizAST->filhos[0]->valor);
+            exit(0);
+        }
+
+        verifica_tipagem(raizAST->filhos[1], id->tipo, tabela);
+
+        if (tipo_igual == false)
+        {
+            printf("O tipo da expressão não coincide com o tipo da variável!\n");
+            exit(0);
+        }
+        
     }
 
     // Travessia recursiva dos filhos
