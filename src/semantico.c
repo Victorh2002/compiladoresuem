@@ -8,21 +8,73 @@
 
 bool erro_semantico = false;
 bool tipo_igual = true;
+bool expressao_logica = false;
+extern long linha;
+
+void verifica_tipo_expressao(ASTNode* raizAST) {
+    if (raizAST == NULL) {
+        return;
+    }
+
+    if (raizAST->type == NODE_TYPE_OPERACAO_BINARIA)
+    {
+        if (strcmp(raizAST->valor, "+") != 0 && strcmp(raizAST->valor, "-") != 0 && strcmp(raizAST->valor, "*") != 0 && strcmp(raizAST->valor, "/") != 0)
+        {
+            expressao_logica = true;
+        }
+    }
+}
 
 void verifica_tipagem(ASTNode* raizAST, char* tipo, TabelaDeSimbolos* tabela) {
     if (raizAST == NULL) {
         return;
     }
 
+    int eh_string = strcmp("string", tipo);
+
     if (raizAST->type == NODE_TYPE_IDENTIFICADOR) {
         Symbol* ID = buscar_simbolo(tabela, raizAST->valor);
         if(ID){
-            if (strcmp(ID->tipo, tipo) != 0)
+            if (strcmp(ID->tipo, "int") == 0 && strcmp(tipo, "float") == 0)
+            {
+                
+            } else if (strcmp(ID->tipo, tipo) != 0 && eh_string != 0)
             {
                 tipo_igual = false;   
-            }
+            } 
+        } else {
+            printf("ID '%s' não existe semelhante ao mundial do Palmeiras!\n", raizAST->valor);
+            exit(0);
         }
     }
+
+    if (raizAST->type == NODE_TYPE_NUMERO)
+    {
+        char* resultado = strchr(raizAST->valor, '.');
+        bool decimal = false;
+        if(resultado != NULL) decimal = true;
+        
+        if (decimal == true && strcmp("float", tipo) != 0){
+
+            tipo_igual = false;
+
+        } else if (strcmp(tipo, "string") == 0 || strcmp(tipo, "char") == 0)
+        {
+            tipo_igual = false;
+        }
+        
+    }
+
+    if (raizAST->type == NODE_TYPE_STRING)
+    {
+        size_t tamanho_string = strlen(raizAST->valor);
+
+        if ((strcmp(tipo, "char") == 0 && tamanho_string > 1) || (strcmp(tipo, "string") != 0 && strcmp(tipo, "char") != 0 ))
+        {
+            tipo_igual = false;
+        }
+    }
+    
 
     for (int i = 0; i < raizAST->child_count; i++)
     {      
@@ -112,10 +164,17 @@ void teste(ASTNode* raizAST, TabelaDeSimbolos* tabela) {
         }
 
         verifica_tipagem(raizAST->filhos[1], id->tipo, tabela);
+        verifica_tipo_expressao(raizAST->filhos[1]);
+
+        if (expressao_logica == true)
+        {
+            printf("Permitido apenas operadores aritméticos em atribuições! Linha: %ld\n", raizAST->linha);
+            exit(0);
+        }
 
         if (tipo_igual == false)
         {
-            printf("O tipo da expressão não coincide com o tipo da variável!\n");
+            printf("O tipo da expressão não coincide com o tipo da variável! Linha: %ld\n", raizAST->linha);
             exit(0);
         }
         

@@ -4,10 +4,45 @@ class Pessoa{
     }
 }
 
+int i1;
+int i2;
+float f1;
+float f2;
+string s1;
+string s2;
+char c1;
+char c2;
+
 int main() {
-    int a = 1;
-    int b;
-    if(a){
-        a = b + b + b;
-    }
+    /* 1. Tipos idênticos */
+
+    i1 = i1 / i2 + 3;
+    i1 = 10;          
+    i1 = i2;          
+
+    f1 = 10.5;        
+    f1 = f2;          
+
+    s1 = "ola mundo"; 
+    s1 = s2;          
+
+    c1 = "a";         
+    c1 = c2;          
+
+    /* 2. O Caso Especial: Promoção de int para float (deve ser válido) */
+    f1 = 10;          
+    f1 = i1;          
+
+    /* 1. Perda de informação (narrowing conversion) */
+    /* i1 = 10.5; */        
+    /* i1 = f1; */      
+
+    /* 2. Tipos completamente incompatíveis */
+    /* i1 = "teste"; */    
+    /*s1 = 100;*/         
+    /*c1 = 20;*/          
+
+    /* 3. String vs Char */
+    s1 = "c";         
+    /*c1 = "texto";*/     
 }

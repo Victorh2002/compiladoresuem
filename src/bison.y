@@ -313,28 +313,28 @@
     comando_if:
         t_if t_parentesabri expressao t_parentesfecha bloco_comandos {
             ASTNode* filhos[] = {$3, $5}; // Filho 0: condição, Filho 1: corpo do if
-            $$ = criar_no(NODE_TYPE_IF, "if", filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_IF, "if", filhos, 2, NULL, @1.first_line);
         } |
         // Forma 2: if-else  
         t_if t_parentesabri expressao t_parentesfecha bloco_comandos t_else bloco_comandos {
             ASTNode* filhos[] = {$3, $5, $7}; // Filho 0: condição, Filho 1: corpo do if, Filho 2: corpo do else
-            $$ = criar_no(NODE_TYPE_IF, "if-else", filhos, 3, NULL);
+            $$ = criar_no(NODE_TYPE_IF, "if-else", filhos, 3, NULL, @1.first_line);
         }
     comando_return:
         // Caso 1: return com uma expressão, ex: return x + 5;
         t_return expressao t_pontvirgula {
             ASTNode* filhos[] = {$2};
-            $$ = criar_no(NODE_TYPE_RETURN, "return", filhos, 1, NULL);
+            $$ = criar_no(NODE_TYPE_RETURN, "return", filhos, 1, NULL, @1.first_line);
         }
         // Caso 2: return sem nada, ex: return;
         | t_return t_pontvirgula {
-            $$ = criar_no(NODE_TYPE_RETURN, "return", NULL, 0, NULL);
+            $$ = criar_no(NODE_TYPE_RETURN, "return", NULL, 0, NULL, @1.first_line);
         }
     comando_while:
         t_while t_parentesabri expressao t_parentesfecha bloco_comandos {
             // Muito parecido com o 'if' simples
             ASTNode* filhos[] = {$3, $5}; // Filho 0: condição, Filho 1: corpo do loop
-            $$ = criar_no(NODE_TYPE_WHILE, "while", filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_WHILE, "while", filhos, 2, NULL, @1.first_line);
         }
     bloco_comandos:
         t_chaveabri lista_comandos t_chavefecha {
@@ -348,76 +348,76 @@
         valor {$$ = $1;} |
         variavel t_igual expressao {
             ASTNode* filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_ATRIBUICAO, "=", filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_ATRIBUICAO, "=", filhos, 2, NULL, @1.first_line);
         } |
         expressao t_mais expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_menos expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_asteristico expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_barra expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_maior expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_menor expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_maiorigual expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_menorigual expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_igualigual expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_diferente expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_and expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         expressao t_or expressao {
             ASTNode *filhos[] = {$1, $3};
-            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_BINARIA, $2, filhos, 2, NULL, @1.first_line);
             if ($2) free($2);
         } |
         t_negacao expressao {
             ASTNode *filhos[] = {$2};
-            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL, @1.first_line);
             if ($2) free($1);
         } |
         t_menos expressao {
             ASTNode *filhos[] = {$2};
-            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL);
+            $$ = criar_no(NODE_TYPE_OPERACAO_UNARIA, $1, filhos, 1, NULL, @1.first_line);
             if ($2) free($1);
         }
         
@@ -437,7 +437,7 @@
 
     variavel:
         t_id {
-            $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, 0, NULL);
+            $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, 0, NULL, @1.first_line);
             if ($1) free($1); // Libera o str do token
         }
 
@@ -445,15 +445,15 @@
 
     valor:
         t_num {
-            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL);
+            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL, @1.first_line);
             if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
         t_decimal {
-            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL);
+            $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL, @1.first_line);
             if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
         t_palavra {
-            $$ = criar_no(NODE_TYPE_STRING, $1, NULL, 0, NULL);
+            $$ = criar_no(NODE_TYPE_STRING, $1, NULL, 0, NULL, @1.first_line);
             if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
         } |
         variavel {$$ = $1;} |
@@ -465,7 +465,7 @@
     // Caso 1: Chamada sem argumentos. Ex: teste()
     t_id t_parentesabri t_parentesfecha {
         // $1 é o nome da função (char*)
-        $$ = criar_no(NODE_TYPE_FUNCAO_CALL, $1, NULL, 0, NULL);
+        $$ = criar_no(NODE_TYPE_FUNCAO_CALL, $1, NULL, 0, NULL, @1.first_line);
         if ($1) free($1);
     }
     // Caso 2: Chamada com argumentos. Ex: soma(10, x)

@@ -40,7 +40,7 @@ typedef struct ASTNode {
 } ASTNode;
 
 // Função auxiliar para criar nós
-ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo);
+ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo, long int linha);
 
 void imprimir_ast(ASTNode *no, int nivel);
 

@@ -10,7 +10,7 @@
  * @param proximo Ponteiro para o próximo comando na lista sequencial.
  * @return Ponteiro para o novo nó alocado.
  */
-ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int num_filhos, ASTNode* proximo) {
+ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int num_filhos, ASTNode* proximo, long linha) {
     ASTNode* novo_no = (ASTNode*) malloc(sizeof(ASTNode));
     if (!novo_no) {
         printf("ERRO: Falha ao alocar memória para nó da AST\n");
@@ -25,7 +25,7 @@ ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int num_f
     novo_no->is_array = 0;
     novo_no->array_size = 0;
     novo_no->child_count = 0;
-    novo_no->linha = 0;
+    novo_no->linha = linha;
     novo_no->filhos = NULL;
 
     // Se houver filhos, aloca o array e os copia
@@ -148,8 +148,7 @@ void lista_para_vetor(ASTNode* no_pai, ASTNode* lista) {
  * @brief Função de conveniência para criar um nó de declaração de variável simples.
  */
 ASTNode* criar_no_declaracao(const char* tipo_dado, const char* nome_var, long linha) {
-    ASTNode* novo_no = criar_no(NODE_TYPE_VAR_DECL, nome_var, NULL, 0, NULL);
-    novo_no->linha = linha;
+    ASTNode* novo_no = criar_no(NODE_TYPE_VAR_DECL, nome_var, NULL, 0, NULL, linha);
     novo_no->tipo_dado = tipo_dado ? strdup(tipo_dado) : NULL;
     return novo_no;
 }
@@ -161,9 +160,8 @@ ASTNode* criar_no_declaracao_com_valor(const char* tipo_dado, const char* nome_v
     ASTNode* filhos[] = {valor_inicial};
     int num_filhos = (valor_inicial != NULL) ? 1 : 0;
     
-    ASTNode* no_decl = criar_no(NODE_TYPE_VAR_DECL, nome_var, filhos, num_filhos, NULL);
+    ASTNode* no_decl = criar_no(NODE_TYPE_VAR_DECL, nome_var, filhos, num_filhos, NULL, linha);
     no_decl->tipo_dado = tipo_dado ? strdup(tipo_dado) : NULL;
-    no_decl->linha = linha;
 
     return no_decl;
 }
@@ -172,10 +170,9 @@ ASTNode* criar_no_declaracao_com_valor(const char* tipo_dado, const char* nome_v
  * @brief Cria um nó para declaração de um vetor, convertendo a lista de inicializadores em filhos.
  */
 ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, ASTNode* lista_inicializadores, long linha) {
-    ASTNode* no_decl = criar_no(NODE_TYPE_VAR_DECL, nome_var, NULL, 0, NULL);
+    ASTNode* no_decl = criar_no(NODE_TYPE_VAR_DECL, nome_var, NULL, 0, NULL, linha);
     no_decl->tipo_dado = tipo_dado ? strdup(tipo_dado) : NULL;
     no_decl->is_array = 1;
-    no_decl->linha = linha;
 
     // Converte a lista ligada de inicializadores em um array de filhos
     int contador = 0;
@@ -208,7 +205,7 @@ ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, 
  * @brief Cria um nó para um literal de vetor, convertendo a lista de elementos em filhos.
  */
 ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos) {
-    ASTNode* no_literal = criar_no(NODE_TYPE_ARRAY_LITERAL, "[]", NULL, 0, NULL);
+    ASTNode* no_literal = criar_no(NODE_TYPE_ARRAY_LITERAL, "[]", NULL, 0, NULL, 0);
     no_literal->is_array = 1;
 
     // Lógica para contar e converter a lista para um array de filhos (idêntica à de cima)
@@ -243,7 +240,7 @@ ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos) {
  */
 ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNode* filhos[], int num_filhos, long linha) {
     // Reutilizamos a função base para criar o nó e anexar os filhos (corpo, parâmetros)
-    ASTNode* no_func = criar_no(NODE_TYPE_FUNCAO_DECL, nome_func, NULL, 0, NULL);
+    ASTNode* no_func = criar_no(NODE_TYPE_FUNCAO_DECL, nome_func, NULL, 0, NULL, linha);
 
     // Converte a lista ligada de argumentos em um array de filhos
     int contador = 0;
@@ -285,7 +282,6 @@ ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNod
     
     // E agora, preenchemos o campo específico do tipo de dado, que faltava antes.
     no_func->tipo_dado = tipo_retorno ? strdup(tipo_retorno) : NULL;
-    no_func->linha = linha;
 
     return no_func;
 }
@@ -293,7 +289,7 @@ ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNod
 
 ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumentos) {
     // Cria o nó "pai" para a chamada de função
-    ASTNode* no_chamada = criar_no(NODE_TYPE_FUNCAO_CALL, nome_func, NULL, 0, NULL);
+    ASTNode* no_chamada = criar_no(NODE_TYPE_FUNCAO_CALL, nome_func, NULL, 0, NULL, 0);
 
     lista_para_vetor(no_chamada, lista_argumentos);
 
@@ -302,8 +298,7 @@ ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumento
 
 ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros, long linha) {
     // Cria o nó "pai" para a declaração da classe
-    ASTNode* no_classe = criar_no(NODE_TYPE_CLASSE_DECL, nome_classe, NULL, 0, NULL);
-    no_classe->linha = linha;
+    ASTNode* no_classe = criar_no(NODE_TYPE_CLASSE_DECL, nome_classe, NULL, 0, NULL, linha);
 
     lista_para_vetor(no_classe, lista_membros);
 
@@ -311,7 +306,7 @@ ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros, long l
 }
 
 ASTNode* criar_no_programa(ASTNode* lista_declaracoes) {
-    ASTNode* no_programa = criar_no(NODE_TYPE_PROGRAMA, "Programa", NULL, 0, NULL);
+    ASTNode* no_programa = criar_no(NODE_TYPE_PROGRAMA, "Programa", NULL, 0, NULL, 0);
     lista_para_vetor(no_programa, lista_declaracoes);
     return no_programa;
 }
