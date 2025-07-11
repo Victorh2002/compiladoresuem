@@ -8,6 +8,6 @@
 #include "symbol_table.h"
 
 void verifica_tipagem(ASTNode* raizAST, char* tipo, TabelaDeSimbolos* tabela);
-void teste(ASTNode* raizAST, TabelaDeSimbolos* tabela);
+void teste(ASTNode* raizAST, ASTNode* raizASTpai, TabelaDeSimbolos* tabela);
 
 #endif

@@ -112,6 +112,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 "}"         { return t_chavefecha;    }
 ";"         { return t_pontvirgula;   }
 ","         { return t_virgula;       }
+"."         { return t_ponto;         }
 
 %{
 

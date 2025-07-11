@@ -38,7 +38,7 @@ void sair_escopo(TabelaDeSimbolos* tabela) {
     tabela->nivel_escopo_atual--;
 }
 
-Symbol* inserir_simbolo(TabelaDeSimbolos* tabela, char* nome, const char* tipo, SymbolKind kind, long linha, int is_global) {
+Symbol* inserir_simbolo(TabelaDeSimbolos* tabela, char* nome, const char* tipo, SymbolKind kind, long linha, int is_global, int is_array, int array_size, char* nome_pai) {
     Symbol** lista = is_global ? &(tabela->globais) : &(tabela->escopos[tabela->nivel_escopo_atual]);
     Symbol* no_atual = *lista;
 
@@ -57,6 +57,9 @@ Symbol* inserir_simbolo(TabelaDeSimbolos* tabela, char* nome, const char* tipo, 
     novo_simbolo->linha = linha;
     novo_simbolo->parametros = NULL;
     novo_simbolo->proximo = *lista;
+    novo_simbolo->is_array = is_array;
+    novo_simbolo->array_size = array_size;
+    novo_simbolo->nome_pai = nome_pai ? strdup(nome_pai) : NULL;
     *lista = novo_simbolo;
 
     printf("--> Símbolo inserido: %s (Escopo %s)\n", nome, is_global ? "Global" : "Local");
@@ -98,11 +101,11 @@ const char* kind_para_string(SymbolKind kind) {
  * Percorre todos os escopos, do global (nível 0) ao mais interno.
  */
 void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
-    printf("\n.------------------------------------------------------------------------------------------.\n");
-    printf("|                                     Tabela de Símbolos                                   |\n");
-    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+\n");
-    printf("| Escopo  | Categoria       | Tipo            | Nome            | Linha      | Parametros  |\n");
-    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+\n");
+    printf("\n.----------------------------------------------------------------------------------------------------------------------.\n");
+    printf("|                                                Tabela de Símbolos                                                    |\n");
+    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+-------------+-------------+\n");
+    printf("| Escopo  | Categoria       | Tipo            | Nome            | Linha      | Parametros  | Vetor       | Classe-Pai  |\n");
+    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+-------------+-------------+\n");
 
     int vazio = 1;
     char buffer_escopo[20];
@@ -123,18 +126,25 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
             vazio = 0;
             // --- LÓGICA DA NOVA COLUNA ---
             char tem_params[5] = "N/A"; // Valor padrão para não-funções
+            char is_array[5] = "N/A";
             if (atual->kind == SYM_FUNCAO) {
                 // Se for uma função, verifica se a lista de parâmetros não é nula
                 strcpy(tem_params, atual->parametros ? "Sim" : "Nao");
             }
-
-            printf("| %-8s| %-16s| %-16s| %-16s| %-10ld | %-11s |\n",
-                   buffer_escopo,
-                   kind_para_string(atual->kind),
-                   atual->tipo ? atual->tipo : "N/A",
-                   atual->nome,
-                   atual->linha,
-                   tem_params); // Imprime a nova coluna
+            if (atual->kind == SYM_VARIAVEL)
+            {   
+                strcpy(is_array, atual->is_array ? "Sim" : "Nao");
+            }
+            
+            printf("| %-8s| %-16s| %-16s| %-16s| %-10ld | %-11s | %-11s | %-11s |\n",
+                    buffer_escopo,
+                    kind_para_string(atual->kind),
+                    atual->tipo ? atual->tipo : "N/A",
+                    atual->nome,
+                    atual->linha,
+                    tem_params,
+                    is_array,
+                    atual->nome_pai ? atual->nome_pai : "N/A"); // Imprime a nova coluna
             atual = atual->proximo;
         }
     }
@@ -145,24 +155,31 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
         vazio = 0;
         // --- LÓGICA DA NOVA COLUNA ---
         char tem_params[5] = "N/A";
+        char is_array[5] = "N/A";
         if (atual->kind == SYM_FUNCAO) {
             strcpy(tem_params, atual->parametros ? "Sim" : "Nao");
         }
+        if (atual->kind == SYM_VARIAVEL)
+        {
+            strcpy(is_array, atual->is_array ? "Sim" : "Nao");
+        }
 
-        printf("| Global  | %-16s| %-16s| %-16s| %-10ld | %-11s |\n",
-               kind_para_string(atual->kind),
-               atual->tipo ? atual->tipo : "N/A",
-               atual->nome,
-               atual->linha,
-               tem_params); // Imprime a nova coluna
+        printf("| Global  | %-16s| %-16s| %-16s| %-10ld | %-11s | %-11s | %-11s |\n",
+                    kind_para_string(atual->kind),
+                    atual->tipo ? atual->tipo : "N/A",
+                    atual->nome,
+                    atual->linha,
+                    tem_params,
+                    is_array,
+                    atual->nome_pai ? atual->nome_pai : "N/A"); // Imprime a nova coluna
         atual = atual->proximo;
     }
 
     if (vazio) {
-        printf("| (Tabela Vazia)                                                                   |\n");
+        printf("| (Tabela Vazia)                                                                                                       |\n");
     }
 
-    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+\n\n");
+    printf("+---------+-----------------+-----------------+-----------------+------------+-------------+-------------+-------------+\n\n");
 }
 
 Param* criar_parametro(const char* nome, const char* tipo) {

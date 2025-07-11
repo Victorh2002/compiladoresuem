@@ -27,7 +27,7 @@
 %token <str> t_class t_palavra
 
 /* Tokens simples que não carregam valor */
-%token t_igual t_pontvirgula t_virgula t_return
+%token t_igual t_pontvirgula t_virgula t_return t_ponto
 %token t_parentesabri t_parentesfecha t_chaveabri t_chavefecha
 %token t_vetorabri t_vetorfecha
 %token t_while t_if t_else
@@ -439,6 +439,19 @@
         t_id {
             $$ = criar_no(NODE_TYPE_IDENTIFICADOR, $1, NULL, 0, NULL, @1.first_line);
             if ($1) free($1); // Libera o str do token
+        } |
+        variavel t_vetorabri expressao t_vetorfecha { 
+            // $1 é o nó da variável (o vetor)
+            // $3 é a árvore da expressão do índice
+            ASTNode* filhos[] = {$1, $3};
+            $$ = criar_no(NODE_TYPE_ARRAY_ACCESS, "[]", filhos, 2, NULL, @1.first_line);
+        } | 
+        variavel t_ponto t_id {
+            // $1 é o nó do objeto (ex: p1)
+            // $3 é o nome do membro (char*)
+            ASTNode* no_objeto[] = {$1};
+            $$ = criar_no(NODE_TYPE_MEMBER_ACCESS, $3, no_objeto, 1, NULL, @1.first_line);
+            if ($3) free($3);
         }
 
 /* Um valor pode ser um número, uma variável, ou uma expressão entre parênteses. */
@@ -462,18 +475,37 @@
         chamada_funcao {$$ = $1;}
 
     chamada_funcao:
-    // Caso 1: Chamada sem argumentos. Ex: teste()
-    t_id t_parentesabri t_parentesfecha {
-        // $1 é o nome da função (char*)
-        $$ = criar_no(NODE_TYPE_FUNCAO_CALL, $1, NULL, 0, NULL, @1.first_line);
-        if ($1) free($1);
-    }
-    // Caso 2: Chamada com argumentos. Ex: soma(10, x)
-    | t_id t_parentesabri lista_elementos t_parentesfecha {
-        // $1 é o nome da função (char*)
-        // $3 é a lista ligada de nós das expressões dos argumentos
-        $$ = criar_no_chamada_funcao($1, $3);
-        if ($1) free($1);
-    }
+        // Caso 1: Chamada sem argumentos. Ex: teste()
+        t_id t_parentesabri t_parentesfecha {
+            // $1 é o nome da função (char*)
+            $$ = criar_no(NODE_TYPE_FUNCAO_CALL, $1, NULL, 0, NULL, @1.first_line);
+            if ($1) free($1);
+        } |
+        // Caso 2: Chamada com argumentos. Ex: soma(10, x)
+        t_id t_parentesabri lista_elementos t_parentesfecha {
+            // $1 é o nome da função (char*)
+            // $3 é a lista ligada de nós das expressões dos argumentos
+            $$ = criar_no_chamada_funcao($1, $3);
+            if ($1) free($1);
+        } |
+        // Caso 3: Chamada de método sem argumentos. Ex: matematica.teste()
+        variavel t_ponto t_id t_parentesabri t_parentesfecha {
+            // $3 é o nome do método (char*)
+            
+            // Criamos um nó METHOD_CALL com filhos para o objeto e os argumentos
+            $$ = criar_no(NODE_TYPE_METHOD_CALL, $3, NULL, 0, NULL, @1.first_line);
+            if ($3) free($3);
+        }
+         |
+        // Caso 4: Chamada de método com argumentos. Ex: matematica.soma(10, x)
+        variavel t_ponto t_id t_parentesabri lista_elementos t_parentesfecha {
+            // $1 é o nó do objeto (ex: p1)
+            // $3 é o nome do método (char*)
+            // $5 é a lista de argumentos
+            
+            // Criamos um nó METHOD_CALL com filhos para o objeto e os argumentos
+            $$ = criar_no_chamada_metodo($3, $5);
+            if ($3) free($3);
+        }
 
 %%

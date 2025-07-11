@@ -106,8 +106,17 @@ void imprimir_ast(ASTNode *no, int nivel) {
         case NODE_TYPE_FUNCAO_CALL:
             printf("Chamada de Funcao: %s\n", no->valor);
             break;
+        case NODE_TYPE_METHOD_CALL:
+            printf("Chamada de Metodo: %s\n", no->valor);
+            break;
         case NODE_TYPE_CLASSE_DECL:
             printf("Declaracao de Classe: %s (Linha: %ld) \n", no->valor, no->linha);
+            break;
+        case NODE_TYPE_ARRAY_ACCESS:
+            printf("Acesso a Vetor: %s\n", no->valor); 
+            break;
+        case NODE_TYPE_MEMBER_ACCESS:
+            printf("ID atributo: %s\n", no->valor); 
             break;
         default:                           
             printf("Nó Desconhecido (%d)\n", no->type); 
@@ -286,7 +295,6 @@ ASTNode* criar_no_funcao(const char* tipo_retorno, const char* nome_func, ASTNod
     return no_func;
 }
 
-
 ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumentos) {
     // Cria o nó "pai" para a chamada de função
     ASTNode* no_chamada = criar_no(NODE_TYPE_FUNCAO_CALL, nome_func, NULL, 0, NULL, 0);
@@ -309,4 +317,13 @@ ASTNode* criar_no_programa(ASTNode* lista_declaracoes) {
     ASTNode* no_programa = criar_no(NODE_TYPE_PROGRAMA, "Programa", NULL, 0, NULL, 0);
     lista_para_vetor(no_programa, lista_declaracoes);
     return no_programa;
+}
+
+ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* lista_argumentos) {
+    // Cria o nó "pai" para a chamada de função
+    ASTNode* no_chamada = criar_no(NODE_TYPE_METHOD_CALL, nome_func, NULL, 0, NULL, 0);
+
+    lista_para_vetor(no_chamada, lista_argumentos);
+
+    return no_chamada;
 }

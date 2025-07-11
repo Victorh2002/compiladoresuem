@@ -22,6 +22,9 @@ typedef enum {
     NODE_TYPE_STRING,
     NODE_TYPE_FUNCAO_CALL,
     NODE_TYPE_CLASSE_DECL,
+    NODE_TYPE_ARRAY_ACCESS,
+    NODE_TYPE_METHOD_CALL,
+    NODE_TYPE_MEMBER_ACCESS
     // Adicione outros tipos de nós conforme necessário
 } NodeType;
 
@@ -40,7 +43,7 @@ typedef struct ASTNode {
 } ASTNode;
 
 // Função auxiliar para criar nós
-ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int tamanho, ASTNode* proximo, long int linha);
+ASTNode* criar_no(NodeType type, const char* valor, ASTNode* filhos[], int num_filhos, ASTNode* proximo, long linha);
 
 void imprimir_ast(ASTNode *no, int nivel);
 
@@ -61,5 +64,7 @@ ASTNode* criar_no_chamada_funcao(const char* nome_func, ASTNode* lista_argumento
 ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros, long linha);
 
 ASTNode* criar_no_programa(ASTNode* lista_declaracoes);
+
+ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* lista_argumentos);
 
 #endif

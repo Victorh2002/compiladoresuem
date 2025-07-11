@@ -40,7 +40,7 @@ int main(int argc, char *arqv[]){
         TabelaDeSimbolos tabela;
         inicializar_tabela(&tabela);
 
-        teste(raiz_ast, &tabela);
+        teste(raiz_ast, NULL, &tabela);
 
         imprimir_tabela_simbolos(tabela);
 
