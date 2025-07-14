@@ -491,9 +491,11 @@
         // Caso 3: Chamada de método sem argumentos. Ex: matematica.teste()
         variavel t_ponto t_id t_parentesabri t_parentesfecha {
             // $3 é o nome do método (char*)
+
+            ASTNode* filhos[] = {$1};
             
             // Criamos um nó METHOD_CALL com filhos para o objeto e os argumentos
-            $$ = criar_no(NODE_TYPE_METHOD_CALL, $3, NULL, 0, NULL, @1.first_line);
+            $$ = criar_no(NODE_TYPE_METHOD_CALL, $3, filhos, 1, NULL, @1.first_line);
             if ($3) free($3);
         }
          |
@@ -502,9 +504,11 @@
             // $1 é o nó do objeto (ex: p1)
             // $3 é o nome do método (char*)
             // $5 é a lista de argumentos
+
+            ASTNode* filhos[] = {$1, $5};
             
             // Criamos um nó METHOD_CALL com filhos para o objeto e os argumentos
-            $$ = criar_no_chamada_metodo($3, $5);
+            $$ = criar_no_chamada_metodo($3, filhos, 2);
             if ($3) free($3);
         }
 

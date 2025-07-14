@@ -1,13 +1,24 @@
 
 class Pessoa{
+    int pesssoa(int ola, float ola2){
+        return 1;
+    }
+    Pessoa cu;
+    int teste;
+}
 
-    int cu = 5;
+int testes(int i){
+    return 1;
 }
 
 Pessoa pessoa;
+int cus;
 
 int main() {
     /* 1. Tipos idênticos */
 
-    pessoa.cu = 1;
+    pessoa.pesssoa(1, 1.1);
+    pessoa.teste = 1 + pessoa.teste + 1;
+
+    
 }

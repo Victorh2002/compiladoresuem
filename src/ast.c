@@ -319,11 +319,47 @@ ASTNode* criar_no_programa(ASTNode* lista_declaracoes) {
     return no_programa;
 }
 
-ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* lista_argumentos) {
+ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* filhos[], int num_filhos) {
     // Cria o nó "pai" para a chamada de função
     ASTNode* no_chamada = criar_no(NODE_TYPE_METHOD_CALL, nome_func, NULL, 0, NULL, 0);
 
-    lista_para_vetor(no_chamada, lista_argumentos);
+    // Converte a lista ligada de argumentos em um array de filhos
+    int contador = 0;
+    int contador_filho[num_filhos];
+    for (int i = 0; i < num_filhos; i++)
+    {
+        ASTNode* no_atual = filhos[i];
+        contador_filho[i] = 0;
+        while (no_atual != NULL) {
+            contador++;
+            contador_filho[i]++;
+            no_atual = no_atual->proximo_comando;
+        }
+    }
+
+    no_chamada->child_count = contador;
+    if (contador > 0) {
+        no_chamada->filhos = malloc(contador * sizeof(ASTNode*));
+
+        ASTNode* no_atual = filhos[0];
+        for (int i = 0; i < contador_filho[0]; i++) {
+            no_chamada->filhos[i] = no_atual;
+            ASTNode* proximo = no_atual->proximo_comando;
+            no_atual->proximo_comando = NULL;
+            no_atual = proximo;           
+        }
+
+        if (contador_filho[1])
+        {
+            no_atual = filhos[1];
+            for (int i = contador_filho[0]; i < contador; i++) {
+                no_chamada->filhos[i] = no_atual;
+                ASTNode* proximo = no_atual->proximo_comando;
+                no_atual->proximo_comando = NULL;
+                no_atual = proximo;
+            }
+        }   
+    }
 
     return no_chamada;
 }

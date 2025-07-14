@@ -65,6 +65,6 @@ ASTNode* criar_no_classe(const char* nome_classe, ASTNode* lista_membros, long l
 
 ASTNode* criar_no_programa(ASTNode* lista_declaracoes);
 
-ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* lista_argumentos);
+ASTNode* criar_no_chamada_metodo(const char* nome_func, ASTNode* filhos[], int num_filhos);
 
 #endif
