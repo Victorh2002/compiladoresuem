@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Types.h>
+
 #include "ast.h"
 #include "symbol_table.h"
 #include "semantico.h"
+#include "codegen.h"
 #include "bison.tab.h"
 
 extern long linha;
@@ -39,10 +43,22 @@ int main(int argc, char *arqv[]){
         }
         TabelaDeSimbolos tabela;
         inicializar_tabela(&tabela);
-
+        
         teste(raiz_ast, NULL, &tabela);
 
         imprimir_tabela_simbolos(tabela);
+
+        GeradorDeCodigo gerador = inicializar_codegen("compilador");
+
+        gerar_codigo(raiz_ast, &gerador, &tabela, NULL);
+
+        printf("\n--- LLVM IR Gerado (impresso no console) ---\n");
+
+        // Esta função imprime todo o conteúdo do módulo no terminal
+        LLVMDumpModule(gerador.modulo);
+
+        LLVMDisposeBuilder(gerador.builder);
+        LLVMDisposeModule(gerador.modulo);
 
     } else { // Erro
         printf("Parsing falhou.\n");

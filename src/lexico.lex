@@ -3,7 +3,7 @@
 %{
     #include <string.h>
     #include "ast.h"
-    #include "bison.tab.h" // Essencial para conhecer os tokens
+    #include "bison.tab.h" 
     extern YYLTYPE yylloc;
 
     // Macro para facilitar a atribuição de lexemas
@@ -11,9 +11,6 @@
 
     /**
      * MACRO DE ATUALIZAÇÃO DE LOCALIZAÇÃO
-     * Esta macro será chamada ANTES de cada 'return'. Ela manualmente define
-     * a linha inicial e final do token atual para a linha que o 'yylineno' está marcando.
-     * Esta é a correção definitiva para o problema do @1.first_line.
      */
     #define YY_USER_ACTION \
         yylloc.first_line = yylineno; \
@@ -53,7 +50,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
     *string_buf_ptr = '\0';
     lexeno(string_buf);
     BEGIN(INITIAL);
-    return t_palavra; // NOTA: Token corrigido
+    return t_palavra; 
 }
 <texto>[^\"\n]+ {
     char *yptr = yytext;
@@ -88,7 +85,6 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 %{
 
 /* --- Operadores e Pontuação --- */
-/* Para estes, o parser só precisa saber o tipo, não o valor "texto" */
 
 %}
 
@@ -100,7 +96,7 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 "!="        { lexeno(yytext); return t_diferente;   }
 "!"         { lexeno(yytext); return t_negacao;     }
 "="         { return t_igual;       }
-"+"         { lexeno(yytext); return t_mais; } // Ação mantida pois o valor é usado na AST
+"+"         { lexeno(yytext); return t_mais; } 
 "-"         { lexeno(yytext); return t_menos; }
 "*"         { lexeno(yytext); return t_asteristico; }
 "/"         { lexeno(yytext); return t_barra; }
@@ -117,7 +113,6 @@ id      [a-zA-Z_][a-zA-Z0-9_]*
 %{
 
 /* --- Literais (Números e Identificadores) --- */
-/* Estes precisam do lexeno pois o valor é importante */
 
 %}
 

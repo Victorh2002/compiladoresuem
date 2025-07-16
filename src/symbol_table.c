@@ -116,7 +116,6 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
         
         // Define o nome do escopo para impressão
         if (i == 0) {
-            // No seu modelo, o nível 0 da pilha pode ser o escopo da primeira função, não o global
             sprintf(buffer_escopo, "local_%d", i); 
         } else {
             sprintf(buffer_escopo, "local_%d", i);
@@ -124,7 +123,6 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
 
         while (atual != NULL) {
             vazio = 0;
-            // --- LÓGICA DA NOVA COLUNA ---
             char tem_params[5] = "N/A"; // Valor padrão para não-funções
             char is_array[5] = "N/A";
             if (atual->kind == SYM_FUNCAO) {
@@ -144,7 +142,7 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
                     atual->linha,
                     tem_params,
                     is_array,
-                    atual->nome_pai ? atual->nome_pai : "N/A"); // Imprime a nova coluna
+                    atual->nome_pai ? atual->nome_pai : "N/A"); 
             atual = atual->proximo;
         }
     }
@@ -153,7 +151,6 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
     Symbol* atual = tabela.globais;
     while (atual != NULL) {
         vazio = 0;
-        // --- LÓGICA DA NOVA COLUNA ---
         char tem_params[5] = "N/A";
         char is_array[5] = "N/A";
         if (atual->kind == SYM_FUNCAO) {
@@ -171,7 +168,7 @@ void imprimir_tabela_simbolos(TabelaDeSimbolos tabela) {
                     atual->linha,
                     tem_params,
                     is_array,
-                    atual->nome_pai ? atual->nome_pai : "N/A"); // Imprime a nova coluna
+                    atual->nome_pai ? atual->nome_pai : "N/A"); 
         atual = atual->proximo;
     }
 

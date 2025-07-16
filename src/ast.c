@@ -202,7 +202,7 @@ ASTNode* criar_no_declaracao_vetor(const char* tipo_dado, const char* nome_var, 
         for (int i = 0; i < contador; i++) {
             no_decl->filhos[i] = no_atual;
             ASTNode* proximo = no_atual->proximo_comando;
-            no_atual->proximo_comando = NULL; // Quebra a corrente da lista
+            no_atual->proximo_comando = NULL; 
             no_atual = proximo;
         }
     }
@@ -217,7 +217,7 @@ ASTNode* criar_no_literal_vetor(ASTNode* lista_elementos) {
     ASTNode* no_literal = criar_no(NODE_TYPE_ARRAY_LITERAL, "[]", NULL, 0, NULL, 0);
     no_literal->is_array = 1;
 
-    // Lógica para contar e converter a lista para um array de filhos (idêntica à de cima)
+    // Lógica para contar e converter a lista para um array de filhos
     int contador = 0;
     ASTNode* no_atual = lista_elementos;
     while (no_atual != NULL) {

@@ -459,15 +459,15 @@
     valor:
         t_num {
             $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL, @1.first_line);
-            if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
+            if ($1) free($1); 
         } |
         t_decimal {
             $$ = criar_no(NODE_TYPE_NUMERO, $1, NULL, 0, NULL, @1.first_line);
-            if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
+            if ($1) free($1); 
         } |
         t_palavra {
             $$ = criar_no(NODE_TYPE_STRING, $1, NULL, 0, NULL, @1.first_line);
-            if ($1) free($1); // Libera o str do token, pois criar_no fez strdup
+            if ($1) free($1); 
         } |
         variavel {$$ = $1;} |
         t_parentesabri expressao t_parentesfecha { $$ = $2; } |

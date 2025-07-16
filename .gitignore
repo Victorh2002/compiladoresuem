@@ -53,7 +53,7 @@ dkms.conf
 src/bison.tab.c
 src/bison.tab.h
 src/lex.yy.c
-teste
+meu_compilador
 saida.teste
 testelexico
 *.output

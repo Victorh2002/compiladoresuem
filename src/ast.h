@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Enum para tipos de nós (exemplo)
+// Enum para tipos de nós
 typedef enum {
     NODE_TYPE_NUMERO,
     NODE_TYPE_IDENTIFICADOR,
@@ -25,10 +25,8 @@ typedef enum {
     NODE_TYPE_ARRAY_ACCESS,
     NODE_TYPE_METHOD_CALL,
     NODE_TYPE_MEMBER_ACCESS
-    // Adicione outros tipos de nós conforme necessário
 } NodeType;
 
-// Estrutura para um nó da AST
 typedef struct ASTNode {
     NodeType type;
     char *tipo_dado;
