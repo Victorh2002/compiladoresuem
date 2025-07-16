@@ -1,3 +1,4 @@
-string main(string teste) {
+int main() {
+    int teste = 1;
     return teste;
 }

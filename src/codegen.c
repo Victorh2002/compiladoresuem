@@ -79,12 +79,37 @@ LLVMValueRef gerar_codigo(ASTNode* raiz, GeradorDeCodigo* gerador, TabelaDeSimbo
     }
 
     if (raiz->type == NODE_TYPE_PROGRAMA) {
-
         for (int i = 0; i < raiz->child_count; i++) {
             gerar_codigo(raiz->filhos[i], gerador, tabela, tabela_codegen);
         }
-    }
-    else if (raiz->type == NODE_TYPE_FUNCAO_DECL) {
+    } else if (raiz->type == NODE_TYPE_VAR_DECL) {
+        LLVMTypeRef tipo_llvm;
+
+        if (strcmp(raiz->tipo_dado, "int") == 0) {
+            tipo_llvm = gerador->tipo_int;
+        } else if (strcmp(raiz->tipo_dado, "float") == 0) {
+            tipo_llvm = gerador->tipo_float;
+        } else if (strcmp(raiz->tipo_dado, "char") == 0) {
+            tipo_llvm = gerador->tipo_char;
+        } else if (strcmp(raiz->tipo_dado, "string") == 0) {
+            tipo_llvm = gerador->tipo_string;
+        } else {
+            fprintf(stderr, "Erro: tipo '%s' não suportado para declaração de variável.\n", raiz->tipo_dado);
+            exit(1);
+        }
+
+        LLVMValueRef alocacao = LLVMBuildAlloca(gerador->builder, tipo_llvm, raiz->valor);
+
+        // Se a variável já vem com valor (tem um filho que é expressão de atribuição)
+        if (raiz->child_count > 0) {
+            LLVMValueRef valor_inicial = gerar_codigo(raiz->filhos[0], gerador, tabela, tabela_codegen);
+            LLVMBuildStore(gerador->builder, valor_inicial, alocacao);
+        }
+
+        inserir_valor_llvm(&tabela_codegen, raiz->valor, alocacao);
+        
+        return alocacao;
+    } else if (raiz->type == NODE_TYPE_FUNCAO_DECL) {
         LLVMTypeRef tipo_retorno = NULL;
         if (strcmp(raiz->tipo_dado, "int") == 0) {
             tipo_retorno = gerador->tipo_int;
@@ -130,7 +155,7 @@ LLVMValueRef gerar_codigo(ASTNode* raiz, GeradorDeCodigo* gerador, TabelaDeSimbo
         }
 
         if (LLVMGetBasicBlockTerminator(LLVMGetLastBasicBlock(funcao)) == NULL) {
-             LLVMBuildRet(gerador->builder, LLVMConstInt(tipo_retorno, 0, false));
+            LLVMBuildRet(gerador->builder, LLVMConstInt(tipo_retorno, 0, false));
         }
 
         if(params) free(params); 

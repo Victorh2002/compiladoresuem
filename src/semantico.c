@@ -11,7 +11,60 @@ bool tipo_igual = true;
 bool expressao_logica = false;
 char* tipo_funcao_atual = NULL;
 bool encontrou_return = false;
+bool concatenacao_string = true;
 extern long linha;
+
+void verificar_chamada_especial(ASTNode* no_chamada, TabelaDeSimbolos* tabela) {
+    const char* nome_funcao = no_chamada->valor;
+
+    // --- Regras para a função especial 'scanf' ---
+    if (strcmp(nome_funcao, "scanf") == 0) {
+        
+        // REGRA: scanf deve ter exatamente um argumento.
+        if (no_chamada->child_count != 1) {
+            fprintf(stderr, "Erro Semântico (linha %ld): A função 'scanf' espera exatamente 1 argumento, mas recebeu %d.\n",
+                    no_chamada->linha, no_chamada->child_count);
+            exit(1); // Para a execução
+        }
+
+        if (no_chamada->filhos[0]->type != NODE_TYPE_IDENTIFICADOR)
+        {
+            fprintf(stderr, "Erro Semântico (linha %ld): A função 'scanf' aceita apenas variáveis no seu argumento!\n", no_chamada->linha);
+            exit(1); // Para a execução
+        }
+
+        Symbol* id = buscar_simbolo(tabela, no_chamada->filhos[0]->valor);
+
+        if (!id)
+        {
+            fprintf(stderr, "Erro Semântico (linha %ld): A variável '%s' não existe!\n", no_chamada->linha, no_chamada->filhos[0]->valor);
+            exit(1); // Para a execução
+        }
+        
+        return; // A verificação para scanf passou.
+    }
+
+    // --- Regras para a função especial 'printf' ---
+    if (strcmp(nome_funcao, "printf") == 0) {
+
+        // REGRA: printf também deve ter exatamente um argumento.
+        if (no_chamada->child_count != 1) {
+            fprintf(stderr, "Erro Semântico (linha %ld): A função 'printf' espera exatamente 1 argumento, mas recebeu %d.\n",
+                    no_chamada->linha, no_chamada->child_count);
+            exit(1); // Para a execução
+        }
+
+        verifica_concatenacao_string(no_chamada);
+
+        if (concatenacao_string == false)
+        {
+            fprintf(stderr, "Erro Semântico (linha %ld): A função 'printf' aceita apenas o simbolo '+' no seu argumento para a concatenaçao de string!\n", no_chamada->linha);
+            exit(1); // Para a execução
+        }
+        
+        return; // A verificação para printf passou.
+    }
+}
 
 void verifica_parametros_chamada_funcao(ASTNode* raizAST, Param* parametros, TabelaDeSimbolos* tabela) {
     if (raizAST == NULL) return;
@@ -64,6 +117,25 @@ void verifica_parametros_chamada_funcao(ASTNode* raizAST, Param* parametros, Tab
         printf("A chamada tem menos argumentos do que os parâmetros esperados!\n");
         exit(1);
     }
+}
+
+void verifica_concatenacao_string (ASTNode* raizAST) {
+    if (raizAST == NULL) {
+        return;
+    }
+
+    if (raizAST->type == NODE_TYPE_OPERACAO_BINARIA)
+    {
+        if (strcmp(raizAST->valor, "+") != 0)
+        {
+            concatenacao_string = false;
+        }
+    }
+
+    for (int i = 0; i < raizAST->child_count; i++)
+    {      
+        verifica_concatenacao_string(raizAST->filhos[i]);
+    }    
 }
 
 void verifica_tipo_expressao(ASTNode* raizAST) {
@@ -208,6 +280,12 @@ void teste(ASTNode* raizAST, ASTNode* raizASTpai, TabelaDeSimbolos* tabela) {
 
     // Inserir classes e funções no escopo global
     if (raizAST->type == NODE_TYPE_CLASSE_DECL) {
+        if (strcmp(raizAST->valor, "main") == 0 || strcmp(raizAST->valor, "scanf") == 0 || strcmp(raizAST->valor, "printf") == 0)
+        {
+            printf("Classe não pode ter o nome de main, scanf ou printf!\n");
+            exit(1);
+        }
+        
         inserir_simbolo(tabela, raizAST->valor, raizAST->tipo_dado,
                         SYM_CLASSE,
                         raizAST->linha, 1, 0, 0, NULL); // Global
@@ -219,6 +297,19 @@ void teste(ASTNode* raizAST, ASTNode* raizASTpai, TabelaDeSimbolos* tabela) {
     }
     else if (raizAST->type == NODE_TYPE_FUNCAO_DECL) {
         Symbol* func;
+
+        if (strcmp(raizAST->valor, "main") == 0 && strcmp(raizAST->tipo_dado, "int") != 0)
+        {
+            printf("Função main só pode ser do tipo 'int'!\n");
+            exit(1);
+        }
+
+        if (strcmp(raizAST->valor, "scanf") == 0 || strcmp(raizAST->valor, "printf") == 0)
+        {
+            printf("Funções não podem ter o nome de scanf ou printf!\n");
+            exit(1);
+        }
+        
         if (raizASTpai != NULL && raizASTpai->type == NODE_TYPE_CLASSE_DECL) {
             func = inserir_simbolo(tabela, raizAST->valor, raizAST->tipo_dado,
                                   SYM_FUNCAO, raizAST->linha, 1, 0, 0, raizASTpai->valor);
@@ -258,6 +349,12 @@ void teste(ASTNode* raizAST, ASTNode* raizASTpai, TabelaDeSimbolos* tabela) {
 
         if (id) {
             printf("Variável, atributo, função ou método com nome '%s' já existe!\n", id->nome);
+            exit(1);
+        }
+
+        if (strcmp(raizAST->valor, "main") == 0 || strcmp(raizAST->valor, "scanf") == 0 || strcmp(raizAST->valor, "printf") == 0)
+        {
+            printf("Variável não pode ter o nome de main, scanf ou printf!\n");
             exit(1);
         }
 
@@ -315,17 +412,24 @@ void teste(ASTNode* raizAST, ASTNode* raizASTpai, TabelaDeSimbolos* tabela) {
     else if (raizAST->type == NODE_TYPE_FUNCAO_CALL) {
         // Chamada de função simples (sem objeto)
         Symbol* func = buscar_simbolo(tabela, raizAST->valor);
-        if (!func) {
+        if (!func && (strcmp(raizAST->valor, "scanf") != 0 && strcmp(raizAST->valor, "printf") != 0)) {
             printf("Erro: função '%s' não encontrada\n", raizAST->valor);
             exit(1);
         }
-        if (func->nome_pai != NULL) {
+        if (func && func->nome_pai != NULL) {
             // função pertence a uma classe, não pode ser chamada diretamente sem objeto
             printf("Erro: função/método '%s' pertence à classe '%s' e não pode ser chamada sem um objeto desse tipo\n",
                 func->nome, func->nome_pai);
             exit(1);
         }
-        verifica_parametros_chamada_funcao(raizAST, func->parametros, tabela);
+
+        if (strcmp(raizAST->valor, "scanf") == 0 || strcmp(raizAST->valor, "printf") == 0)
+        {
+            verificar_chamada_especial(raizAST, tabela);
+        } else
+        {
+            verifica_parametros_chamada_funcao(raizAST, func->parametros, tabela);
+        }
     }
     else if (raizAST->type == NODE_TYPE_METHOD_CALL) {
         Symbol* membro = buscar_simbolo(tabela, raizAST->valor);
